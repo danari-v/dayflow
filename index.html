@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DayFlow ✦</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F5F0E8;
+      --surface: #FEFCF7;
+      --border: #E2D9C8;
+      --ink: #1A1612;
+      --ink-muted: #7A6F62;
+      --accent: #C84B2F;
+      --accent-light: #F2E8E4;
+      --routine: #2E6B4F;
+      --routine-light: #E4F0EB;
+      --task: #1A4A7A;
+      --task-light: #E4EDF5;
+      --done: #A0A098;
+      --done-light: #F0F0EE;
+      --shadow: 0 2px 12px rgba(26,22,18,0.08);
+      --radius: 12px;
+    }
+
+```
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+.logo span { color: var(--accent); }
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.date-nav button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-muted);
+  transition: all 0.15s;
+}
+.date-nav button:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+#current-date {
+  font-weight: 500;
+  font-size: 14px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 3px;
+}
+.nav-tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-tab.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── TODAY VIEW ── */
+.today-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 640px) {
+  .today-grid { grid-template-columns: 1fr; }
+  header { flex-wrap: wrap; gap: 10px; }
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+}
+.panel-count {
+  font-size: 12px;
+  color: var(--ink-muted);
+  background: var(--bg);
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.timeline {
+  grid-column: 1 / -1;
+}
+
+/* ── TIMELINE ── */
+.timeline-list {
+  padding: 12px 0;
+}
+
+.time-slot {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0 20px;
+  min-height: 52px;
+}
+
+.time-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  letter-spacing: 0.5px;
+  min-width: 44px;
+  padding-top: 14px;
+  text-align: right;
+}
+
+.time-line-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 24px;
+  flex-shrink: 0;
+  padding-top: 18px;
+}
+.time-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.time-dot.has-item { background: var(--accent); }
+.time-dot.routine-dot { background: var(--routine); }
+.time-connector {
+  width: 1px;
+  flex: 1;
+  background: var(--border);
+  min-height: 20px;
+}
+
+.time-items {
+  flex: 1;
+  padding: 8px 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── TODO ITEMS ── */
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  cursor: pointer;
+  position: relative;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.todo-item.routine { background: var(--routine-light); border-color: #C8E2D5; }
+.todo-item.task    { background: var(--task-light);    border-color: #C8D9E8; }
+.todo-item.oneoff  { background: var(--accent-light);  border-color: #E8C8BE; }
+.todo-item.done    { background: var(--done-light);    border-color: var(--border); opacity: 0.7; }
+
+.todo-check {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  font-size: 11px;
+}
+.todo-item.routine .todo-check { border-color: var(--routine); }
+.todo-item.task    .todo-check { border-color: var(--task); }
+.todo-item.oneoff  .todo-check { border-color: var(--accent); }
+.todo-item.done    .todo-check { background: var(--done); border-color: var(--done); color: white; }
+
+.todo-content { flex: 1; min-width: 0; }
+.todo-text {
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.todo-item.done .todo-text { text-decoration: line-through; color: var(--ink-muted); }
+.todo-meta {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+  align-items: center;
+}
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.badge.routine { background: var(--routine); color: white; }
+.badge.task    { background: var(--task);    color: white; }
+.badge.oneoff  { background: var(--accent);  color: white; }
+.time-badge {
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.todo-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.todo-item:hover .todo-actions { opacity: 1; }
+.action-btn {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(26,22,18,0.07);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.action-btn:hover { background: rgba(26,22,18,0.15); }
+.action-btn.del:hover { background: #FDDDD8; }
+
+/* ── TASK LIST PANEL ── */
+.task-list { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+/* ── ADD BUTTON ── */
+.fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(200,75,47,0.4);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  z-index: 200;
+}
+.fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(200,75,47,0.5); }
+.fab:active { transform: scale(0.95); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,22,18,0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 300;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 560px;
+  transform: translateY(40px);
+  transition: transform 0.25s ease;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+}
+.form-input, .form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.day-checkboxes {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.day-cb {
+  display: none;
+}
+.day-cb + label {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--ink-muted);
+}
+.day-cb:checked + label {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #B03D22; }
+.btn-secondary { background: var(--bg); color: var(--ink-muted); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  padding: 12px 20px 16px;
+}
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--routine), var(--accent));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* ── STATS VIEW ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+@media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+
+.chart-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.chart-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  margin-bottom: 16px;
+}
+
+/* Bar chart */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+}
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--accent) 0%, #E87060 100%);
+  transition: height 0.4s ease;
+  min-height: 2px;
+}
+.bar.routine-bar { background: linear-gradient(180deg, var(--routine) 0%, #4A9B75 100%); }
+.bar-label { font-size: 10px; color: var(--ink-muted); }
+.bar-pct { font-size: 10px; font-weight: 600; color: var(--ink-muted); }
+
+.period-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 3px;
+  width: fit-content;
+}
+.period-tab {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.period-tab.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+/* AI Summary */
+.ai-summary {
+  background: linear-gradient(135deg, #FFF8F5, var(--surface));
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.ai-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ai-icon {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: white;
+}
+.ai-summary-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+}
+.ai-summary-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.ai-loading {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+.dot-pulse {
+  display: flex; gap: 4px;
+}
+.dot-pulse span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.2s infinite;
+}
+.dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* ── MANAGE VIEW ── */
+.manage-section { margin-bottom: 24px; }
+.manage-section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.manage-list { display: flex; flex-direction: column; gap: 8px; }
+.manage-item {
+  background: var(--surface);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.manage-item-info { flex: 1; }
+.manage-item-title { font-size: 14px; font-weight: 500; }
+.manage-item-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-muted);
+}
+.empty-icon { font-size: 36px; margin-bottom: 10px; }
+.empty-text { font-size: 14px; }
+
+/* ── SUPABASE CONFIG ── */
+#config-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.config-box {
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+}
+.config-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+.config-logo span { color: var(--accent); }
+.config-sub {
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.config-note {
+  background: var(--accent-light);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  color: var(--ink);
+  margin-top: 12px;
+  line-height: 1.6;
+}
+```
+
+  </style>
+</head>
+<body>
+
+<!-- CONFIG OVERLAY -->
+
+<div id="config-overlay">
+  <div class="config-box">
+    <div class="config-logo">DayFlow <span>✦</span></div>
+    <p class="config-sub">Supabase 연결 정보를 입력해주세요.<br>한 번만 설정하면 모든 기기에서 동기화됩니다.</p>
+    <div class="form-group">
+      <label class="form-label">Supabase URL</label>
+      <input class="form-input" id="cfg-url" placeholder="https://xxxx.supabase.co" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Anon Key</label>
+      <input class="form-input" id="cfg-key" placeholder="eyJh..." />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveConfig()">저장하고 시작</button>
+    </div>
+    <div class="config-note">
+      💡 Supabase 설정 방법은 같이 드리는 가이드를 참고해주세요.
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div class="app" id="app" style="display:none">
+  <header>
+    <div class="logo">Day<span>Flow</span> ✦</div>
+    <div class="date-nav">
+      <button onclick="changeDate(-1)">‹</button>
+      <span id="current-date"></span>
+      <button onclick="changeDate(1)">›</button>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('today', this)">오늘</button>
+      <button class="nav-tab" onclick="showView('stats', this)">분석</button>
+      <button class="nav-tab" onclick="showView('manage', this)">관리</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- TODAY VIEW -->
+    <div class="view active" id="view-today">
+      <div class="progress-wrap" style="background:var(--surface);border-radius:12px;border:1px solid var(--border);margin-bottom:16px">
+        <div class="progress-info">
+          <span id="progress-label">오늘 진행률</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+
+```
+  <div class="today-grid">
+    <!-- TIMELINE -->
+    <div class="panel timeline">
+      <div class="panel-header">
+        <span class="panel-title">⏱ 타임라인</span>
+        <span class="panel-count" id="timeline-count">0개</span>
+      </div>
+      <div class="timeline-list" id="timeline-list"></div>
+    </div>
+
+    <!-- NO-TIME TASKS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📋 할 일</span>
+        <span class="panel-count" id="notime-count">0개</span>
+      </div>
+      <div class="task-list" id="notime-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS VIEW -->
+<div class="view" id="view-stats">
+  <div class="period-tabs">
+    <button class="period-tab active" onclick="setPeriod('week', this)">이번 주</button>
+    <button class="period-tab" onclick="setPeriod('month', this)">이번 달</button>
+    <button class="period-tab" onclick="setPeriod('year', this)">올해</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">–</div>
+      <div class="stat-label">총 할 일</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-done">–</div>
+      <div class="stat-label">완료</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-rate">–</div>
+      <div class="stat-label">완료율</div>
+    </div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="chart-title">📊 일별 완료율</div>
+    <div class="bar-chart" id="bar-chart"></div>
+  </div>
+
+  <div class="ai-summary">
+    <div class="ai-summary-header">
+      <div class="ai-icon">✦</div>
+      <div class="ai-summary-title">AI 패턴 분석</div>
+    </div>
+    <div id="ai-summary-text" class="ai-summary-text">
+      <div class="ai-loading">
+        <div class="dot-pulse"><span></span><span></span><span></span></div>
+        <span>분석 중...</span>
+      </div>
+    </div>
+    <button class="btn btn-secondary" style="width:100%;margin-top:14px;font-size:13px" onclick="runAiAnalysis()">🔄 분석 다시 실행</button>
+  </div>
+</div>
+
+<!-- MANAGE VIEW -->
+<div class="view" id="view-manage">
+  <div class="manage-section">
+    <div class="manage-section-title">🔄 루틴 항목</div>
+    <div class="manage-list" id="manage-routines"></div>
+  </div>
+  <div class="manage-section">
+    <div class="manage-section-title">📌 정기 할 일</div>
+    <div class="manage-list" id="manage-tasks"></div>
+  </div>
+  <div style="text-align:right;padding-top:8px">
+    <button class="btn btn-secondary" style="width:auto;padding:8px 16px;font-size:13px" onclick="openModal()">+ 새 항목 추가</button>
+  </div>
+</div>
+```
+
+  </main>
+</div>
+
+<!-- FAB -->
+
+<button class="fab" id="fab" onclick="openModal()" style="display:none">+</button>
+
+<!-- ADD MODAL -->
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">할 일 추가</h3>
+    <div class="form-group">
+      <label class="form-label">내용</label>
+      <input class="form-input" id="f-text" placeholder="무엇을 할까요?" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">시간 (선택)</label>
+        <input class="form-input" id="f-time" type="time" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">유형</label>
+        <select class="form-select" id="f-type" onchange="onTypeChange()">
+          <option value="oneoff">단발 (오늘만)</option>
+          <option value="routine">루틴 (매일)</option>
+          <option value="task">정기 (요일 지정)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="days-group" style="display:none">
+      <label class="form-label">반복 요일</label>
+      <div class="day-checkboxes">
+        <input type="checkbox" class="day-cb" id="d0" value="0"><label for="d0">일</label>
+        <input type="checkbox" class="day-cb" id="d1" value="1"><label for="d1">월</label>
+        <input type="checkbox" class="day-cb" id="d2" value="2"><label for="d2">화</label>
+        <input type="checkbox" class="day-cb" id="d3" value="3"><label for="d3">수</label>
+        <input type="checkbox" class="day-cb" id="d4" value="4"><label for="d4">목</label>
+        <input type="checkbox" class="day-cb" id="d5" value="5"><label for="d5">금</label>
+        <input type="checkbox" class="day-cb" id="d6" value="6"><label for="d6">토</label>
+      </div>
+    </div>
+    <input type="hidden" id="f-edit-id" />
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveTodo()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
+let SUPABASE_URL = localStorage.getItem('df_url') || '';
+let SUPABASE_KEY = localStorage.getItem('df_key') || '';
+
+function saveConfig() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) return alert('URL과 Key를 모두 입력해주세요.');
+  localStorage.setItem('df_url', url);
+  localStorage.setItem('df_key', key);
+  SUPABASE_URL = url;
+  SUPABASE_KEY = key;
+  document.getElementById('config-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('fab').style.display = 'flex';
+  init();
+}
+
+function checkConfig() {
+  if (SUPABASE_URL && SUPABASE_KEY) {
+    document.getElementById('config-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('fab').style.display = 'flex';
+    return true;
+  }
+  return false;
+}
+
+// ══════════════════════════════════════════════
+//  SUPABASE HELPERS
+// ══════════════════════════════════════════════
+async function sbFetch(path, method = 'GET', body = null, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}${params}`, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal'
+    },
+    body: body ? JSON.stringify(body) : null
+  });
+  if (method === 'GET' || method === 'POST') {
+    const text = await res.text();
+    return text ? JSON.parse(text) : [];
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let currentDate = new Date();
+let todos = []; // master definitions
+let logs = [];  // daily completions
+let currentPeriod = 'week';
+
+function todayStr(d = currentDate) {
+  return d.toISOString().slice(0, 10);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+async function init() {
+  updateDateDisplay();
+  await fetchAll();
+  renderToday();
+}
+
+async function fetchAll() {
+  try {
+    todos = await sbFetch('df_todos', 'GET', null, '?order=time.asc.nullslast');
+    if (!Array.isArray(todos)) todos = [];
+  } catch(e) { todos = []; }
+
+  try {
+    const from = new Date(); from.setDate(from.getDate() - 60);
+    logs = await sbFetch('df_logs', 'GET', null, `?date=gte.${from.toISOString().slice(0,10)}&order=date.asc`);
+    if (!Array.isArray(logs)) logs = [];
+  } catch(e) { logs = []; }
+}
+
+// ══════════════════════════════════════════════
+//  WHICH TODOS ARE ACTIVE TODAY?
+// ══════════════════════════════════════════════
+function getTodayTodos() {
+  const d = currentDate;
+  const dow = d.getDay(); // 0=Sun
+  const ds = todayStr(d);
+
+  return todos.filter(t => {
+    if (t.type === 'oneoff') return t.date === ds;
+    if (t.type === 'routine') return true;
+    if (t.type === 'task') {
+      const days = t.repeat_days || [];
+      return days.includes(dow);
+    }
+    return false;
+  });
+}
+
+function isDone(todoId) {
+  return logs.some(l => l.todo_id === todoId && l.date === todayStr());
+}
+
+// ══════════════════════════════════════════════
+//  RENDER TODAY
+// ══════════════════════════════════════════════
+function renderToday() {
+  const todayTodos = getTodayTodos();
+  const withTime = todayTodos.filter(t => t.time).sort((a,b) => a.time.localeCompare(b.time));
+  const noTime = todayTodos.filter(t => !t.time);
+
+  renderTimeline(withTime);
+  renderNoTime(noTime);
+  updateProgress(todayTodos);
+
+  document.getElementById('timeline-count').textContent = withTime.length + '개';
+  document.getElementById('notime-count').textContent = noTime.length + '개';
+}
+
+function renderTimeline(items) {
+  const el = document.getElementById('timeline-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⏰</div><div class="empty-text">시간이 정해진 일정이 없어요</div></div>';
+    return;
+  }
+  el.innerHTML = items.map(t => {
+    const done = isDone(t.id);
+    return `
+    <div class="time-slot">
+      <div class="time-label">${t.time ? t.time.slice(0,5) : ''}</div>
+      <div class="time-line-col">
+        <div class="time-dot ${t.time ? (t.type === 'routine' ? 'routine-dot' : 'has-item') : ''}"></div>
+        <div class="time-connector"></div>
+      </div>
+      <div class="time-items">
+        ${todoCard(t, done)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNoTime(items) {
+  const el = document.getElementById('notime-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">추가 할 일이 없어요</div></div>';
+    return;
+  }
+  el.innerHTML = items.map(t => todoCard(t, isDone(t.id))).join('');
+}
+
+function todoCard(t, done) {
+  return `
+  <div class="todo-item ${t.type} ${done ? 'done' : ''}" id="item-${t.id}">
+    <div class="todo-check" onclick="toggleDone('${t.id}')">${done ? '✓' : ''}</div>
+    <div class="todo-content">
+      <div class="todo-text">${t.text}</div>
+      <div class="todo-meta">
+        <span class="badge ${t.type}">${t.type === 'routine' ? '루틴' : t.type === 'task' ? '정기' : '단발'}</span>
+        ${t.time ? `<span class="time-badge">${t.time.slice(0,5)}</span>` : ''}
+      </div>
+    </div>
+    <div class="todo-actions">
+      <button class="action-btn" onclick="editTodo('${t.id}')">✎</button>
+      <button class="action-btn del" onclick="deleteTodo('${t.id}')">✕</button>
+    </div>
+  </div>`;
+}
+
+function updateProgress(items) {
+  const total = items.length;
+  const done = items.filter(t => isDone(t.id)).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label').textContent = `오늘 ${done}/${total} 완료`;
+}
+
+// ══════════════════════════════════════════════
+//  TOGGLE DONE
+// ══════════════════════════════════════════════
+async function toggleDone(id) {
+  const ds = todayStr();
+  const existing = logs.find(l => l.todo_id === id && l.date === ds);
+
+  if (existing) {
+    await sbFetch(`df_logs?id=eq.${existing.id}`, 'DELETE');
+    logs = logs.filter(l => l.id !== existing.id);
+  } else {
+    const res = await sbFetch('df_logs', 'POST', { todo_id: id, date: ds });
+    if (Array.isArray(res) && res[0]) logs.push(res[0]);
+  }
+  renderToday();
+}
+
+// ══════════════════════════════════════════════
+//  ADD / EDIT / DELETE
+// ══════════════════════════════════════════════
+function openModal(todo = null) {
+  const modal = document.getElementById('modal');
+  document.getElementById('f-text').value = todo ? todo.text : '';
+  document.getElementById('f-time').value = todo ? (todo.time || '') : '';
+  document.getElementById('f-type').value = todo ? todo.type : 'oneoff';
+  document.getElementById('f-edit-id').value = todo ? todo.id : '';
+  document.getElementById('modal-title').textContent = todo ? '할 일 수정' : '할 일 추가';
+  onTypeChange();
+  if (todo && todo.repeat_days) {
+    todo.repeat_days.forEach(d => {
+      const cb = document.getElementById('d' + d);
+      if (cb) cb.checked = true;
+    });
+  }
+  modal.classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.querySelectorAll('.day-cb').forEach(cb => cb.checked = false);
+}
+
+function onTypeChange() {
+  const type = document.getElementById('f-type').value;
+  document.getElementById('days-group').style.display = type === 'task' ? 'block' : 'none';
+}
+
+async function saveTodo() {
+  const text = document.getElementById('f-text').value.trim();
+  if (!text) return alert('내용을 입력해주세요.');
+  const time = document.getElementById('f-time').value || null;
+  const type = document.getElementById('f-type').value;
+  const editId = document.getElementById('f-edit-id').value;
+  const repeat_days = type === 'task'
+    ? [...document.querySelectorAll('.day-cb:checked')].map(cb => parseInt(cb.value))
+    : (type === 'routine' ? [0,1,2,3,4,5,6] : null);
+  const date = type === 'oneoff' ? todayStr() : null;
+
+  const payload = { text, time, type, repeat_days, date };
+
+  if (editId) {
+    await sbFetch(`df_todos?id=eq.${editId}`, 'PATCH', payload);
+    const idx = todos.findIndex(t => t.id === editId);
+    if (idx >= 0) todos[idx] = { ...todos[idx], ...payload };
+  } else {
+    const res = await sbFetch('df_todos', 'POST', payload);
+    if (Array.isArray(res) && res[0]) todos.push(res[0]);
+  }
+
+  closeModal();
+  renderToday();
+  if (document.getElementById('view-manage').classList.contains('active')) renderManage();
+}
+
+async function deleteTodo(id) {
+  if (!confirm('삭제할까요?')) return;
+  await sbFetch(`df_todos?id=eq.${id}`, 'DELETE');
+  todos = todos.filter(t => t.id !== id);
+  logs = logs.filter(l => l.todo_id !== id);
+  renderToday();
+  renderManage();
+}
+
+function editTodo(id) {
+  const t = todos.find(t => t.id === id);
+  if (t) openModal(t);
+}
+
+// ══════════════════════════════════════════════
+//  STATS VIEW
+// ══════════════════════════════════════════════
+function renderStats() {
+  calcStats();
+  runAiAnalysis();
+}
+
+function setPeriod(p, btn) {
+  currentPeriod = p;
+  document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calcStats();
+}
+
+function calcStats() {
+  const now = new Date();
+  let days = [];
+
+  if (currentPeriod === 'week') {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now); d.setDate(now.getDate() - i);
+      days.push(d.toISOString().slice(0,10));
+    }
+  } else if (currentPeriod === 'month') {
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+    for (let i = 1; i <= daysInMonth; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), i);
+      if (d <= now) days.push(d.toISOString().slice(0,10));
+    }
+  } else {
+    for (let m = 0; m < 12; m++) {
+      const d = new Date(now.getFullYear(), m, 1);
+      if (d <= now) days.push(d.toISOString().slice(0,10).slice(0,7));
+    }
+  }
+
+  let totalDone = 0, totalTasks = 0;
+  const dayData = days.map(ds => {
+    const isMonth = currentPeriod === 'year';
+    const dayLogs = isMonth
+      ? logs.filter(l => l.date.startsWith(ds))
+      : logs.filter(l => l.date === ds);
+
+    const done = dayLogs.length;
+    // estimate tasks for that day
+    const d = new Date(ds + (isMonth ? '-15' : ''));
+    const activeTodos = todos.filter(t => {
+      if (t.type === 'oneoff') return t.date === ds;
+      if (t.type === 'routine') return true;
+      if (t.type === 'task') return (t.repeat_days || []).includes(d.getDay());
+      return false;
+    });
+    const total = Math.max(done, activeTodos.length);
+    totalDone += done;
+    totalTasks += total;
+    const label = isMonth
+      ? ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][new Date(ds+'-15').getMonth()]
+      : currentPeriod === 'week'
+        ? ['일','월','화','수','목','금','토'][new Date(ds).getDay()]
+        : String(new Date(ds).getDate());
+    return { label, done, total, pct: total ? Math.round(done/total*100) : 0 };
+  });
+
+  document.getElementById('stat-total').textContent = totalTasks;
+  document.getElementById('stat-done').textContent = totalDone;
+  document.getElementById('stat-rate').textContent = totalTasks ? Math.round(totalDone/totalTasks*100) + '%' : '–';
+
+  // Bar chart
+  const chart = document.getElementById('bar-chart');
+  const maxPct = Math.max(...dayData.map(d => d.pct), 1);
+  chart.innerHTML = dayData.map(d => `
+    <div class="bar-col">
+      <div class="bar-pct">${d.pct > 0 ? d.pct+'%' : ''}</div>
+      <div class="bar ${d.pct > 70 ? 'routine-bar' : ''}" style="height:${Math.max(d.pct/maxPct*100, 2)}%"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>
+  `).join('');
+}
+
+async function runAiAnalysis() {
+  const el = document.getElementById('ai-summary-text');
+  el.innerHTML = '<div class="ai-loading"><div class="dot-pulse"><span></span><span></span><span></span></div><span>AI 분석 중...</span></div>';
+
+  // Build summary data for AI
+  const now = new Date();
+  const from = new Date(now); from.setDate(now.getDate() - 30);
+  const recentLogs = logs.filter(l => new Date(l.date) >= from);
+
+  const dayMap = {};
+  recentLogs.forEach(l => {
+    dayMap[l.date] = (dayMap[l.date] || 0) + 1;
+  });
+
+  const routineNames = todos.filter(t => t.type === 'routine').map(t => t.text).join(', ');
+  const taskNames = todos.filter(t => t.type === 'task').map(t => t.text).join(', ');
+  const avgPerDay = recentLogs.length ? (recentLogs.length / 30).toFixed(1) : 0;
+  const bestDay = Object.entries(dayMap).sort((a,b) => b[1]-a[1])[0];
+
+  const prompt = `다음은 사용자의 최근 30일 투두리스트 데이터야:
+- 루틴 항목: ${routineNames || '없음'}
+- 정기 항목: ${taskNames || '없음'}
+- 일평균 완료: ${avgPerDay}개
+- 가장 많이 완료한 날: ${bestDay ? bestDay[0] + ' (' + bestDay[1] + '개)' : '없음'}
+- 총 완료 기록: ${recentLogs.length}개
+
+이 데이터를 바탕으로 패턴 분석과 개선 제안을 한국어로 3-4문장으로 따뜻하게 요약해줘. 완료를 잘 못한 날이 있다면 부드럽게 언급하고, 잘 하는 부분은 칭찬해줘.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '분석 데이터가 부족해요. 며칠 더 사용하면 분석이 가능해요!';
+    el.innerHTML = `<p class="ai-summary-text">${text}</p>`;
+  } catch(e) {
+    el.innerHTML = '<p class="ai-summary-text">분석을 불러오지 못했어요. 잠시 후 다시 시도해주세요.</p>';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  MANAGE VIEW
+// ══════════════════════════════════════════════
+function renderManage() {
+  const routines = todos.filter(t => t.type === 'routine');
+  const tasks = todos.filter(t => t.type === 'task');
+
+  const renderList = (items, elId) => {
+    const el = document.getElementById(elId);
+    if (!items.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-text">항목이 없어요</div></div>';
+      return;
+    }
+    el.innerHTML = items.map(t => `
+      <div class="manage-item">
+        <span class="badge ${t.type}">${t.type === 'routine' ? '루틴' : '정기'}</span>
+        <div class="manage-item-info">
+          <div class="manage-item-title">${t.text}</div>
+          <div class="manage-item-sub">
+            ${t.time ? '⏰ ' + t.time.slice(0,5) + ' &nbsp;' : ''}
+            ${t.type === 'task' ? '📅 ' + formatDays(t.repeat_days) : '매일'}
+          </div>
+        </div>
+        <button class="action-btn" onclick="editTodo('${t.id}')">✎</button>
+        <button class="action-btn del" onclick="deleteTodo('${t.id}')">✕</button>
+      </div>
+    `).join('');
+  };
+
+  renderList(routines, 'manage-routines');
+  renderList(tasks, 'manage-tasks');
+}
+
+function formatDays(days) {
+  if (!days) return '';
+  const names = ['일','월','화','수','목','금','토'];
+  return days.map(d => names[d]).join(', ');
+}
+
+// ══════════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════════
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  if (name === 'stats') renderStats();
+  if (name === 'manage') renderManage();
+}
+
+// ══════════════════════════════════════════════
+//  DATE NAV
+// ══════════════════════════════════════════════
+function changeDate(offset) {
+  currentDate = new Date(currentDate);
+  currentDate.setDate(currentDate.getDate() + offset);
+  updateDateDisplay();
+  renderToday();
+}
+
+function updateDateDisplay() {
+  const d = currentDate;
+  const days = ['일','월','화','수','목','금','토'];
+  const str = `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  document.getElementById('current-date').textContent = str;
+}
+
+// ══════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  if (checkConfig()) init();
+});
+</script>
+
+</body>
+</html>
