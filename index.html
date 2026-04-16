@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DayFlow ✦</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #F5F0E8;
@@ -29,7 +29,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nanum Gothic', sans-serif;
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
@@ -51,8 +51,9 @@ header {
 }
 
 .logo {
-  font-family: 'DM Serif Display', serif;
-  font-size: 22px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 24px;
   letter-spacing: -0.5px;
   color: var(--ink);
 }
@@ -139,8 +140,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   justify-content: space-between;
 }
 .panel-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 17px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 18px;
 }
 .panel-count {
   font-size: 12px;
@@ -342,8 +344,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
 .modal-overlay.open .modal { transform: translateY(0); }
 
 .modal h3 {
-  font-family: 'DM Serif Display', serif;
-  font-size: 20px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 22px;
   margin-bottom: 20px;
 }
 
@@ -363,7 +366,7 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nanum Gothic', sans-serif;
   font-size: 15px;
   color: var(--ink);
   outline: none;
@@ -406,9 +409,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   padding: 12px;
   border-radius: 10px;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nanum Gothic', sans-serif;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -458,7 +461,8 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   text-align: center;
 }
 .stat-num {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
   font-size: 32px;
   line-height: 1;
 }
@@ -476,8 +480,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   margin-bottom: 20px;
 }
 .chart-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 17px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 18px;
   margin-bottom: 16px;
 }
 
@@ -558,8 +563,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   color: white;
 }
 .ai-summary-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 16px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 18px;
 }
 .ai-summary-text {
   font-size: 14px;
@@ -592,8 +598,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
 /* ── MANAGE VIEW ── */
 .manage-section { margin-bottom: 24px; }
 .manage-section-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 18px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 20px;
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
@@ -639,8 +646,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
   width: 100%;
 }
 .config-logo {
-  font-family: 'DM Serif Display', serif;
-  font-size: 28px;
+  font-family: 'Gaegu', cursive;
+  font-weight: 700;
+  font-size: 32px;
   margin-bottom: 6px;
 }
 .config-logo span { color: var(--accent); }
@@ -784,11 +792,11 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
 <!-- MANAGE VIEW -->
 <div class="view" id="view-manage">
   <div class="manage-section">
-    <div class="manage-section-title">🔄 루틴 항목</div>
+    <div class="manage-section-title">🔄 데일리 항목</div>
     <div class="manage-list" id="manage-routines"></div>
   </div>
   <div class="manage-section">
-    <div class="manage-section-title">📌 정기 할 일</div>
+    <div class="manage-section-title">📌 스케쥴 할 일</div>
     <div class="manage-list" id="manage-tasks"></div>
   </div>
   <div style="text-align:right;padding-top:8px">
@@ -821,9 +829,9 @@ main { flex: 1; padding: 24px; max-width: 900px; margin: 0 auto; width: 100%; }
       <div class="form-group">
         <label class="form-label">유형</label>
         <select class="form-select" id="f-type" onchange="onTypeChange()">
-          <option value="oneoff">단발 (오늘만)</option>
-          <option value="routine">루틴 (매일)</option>
-          <option value="task">정기 (요일 지정)</option>
+          <option value="oneoff">원데이 (오늘만)</option>
+          <option value="routine">데일리 (매일)</option>
+          <option value="task">스케쥴 (요일 지정)</option>
         </select>
       </div>
     </div>
@@ -1010,7 +1018,7 @@ function todoCard(t, done) {
     <div class="todo-content">
       <div class="todo-text">${t.text}</div>
       <div class="todo-meta">
-        <span class="badge ${t.type}">${t.type === 'routine' ? '루틴' : t.type === 'task' ? '정기' : '단발'}</span>
+        <span class="badge ${t.type}">${t.type === 'routine' ? '데일리' : t.type === 'task' ? '스케쥴' : '원데이'}</span>
         ${t.time ? `<span class="time-badge">${t.time.slice(0,5)}</span>` : ''}
       </div>
     </div>
@@ -1259,7 +1267,7 @@ function renderManage() {
     }
     el.innerHTML = items.map(t => `
       <div class="manage-item">
-        <span class="badge ${t.type}">${t.type === 'routine' ? '루틴' : '정기'}</span>
+        <span class="badge ${t.type}">${t.type === 'routine' ? '데일리' : '스케쥴'}</span>
         <div class="manage-item-info">
           <div class="manage-item-title">${t.text}</div>
           <div class="manage-item-sub">
