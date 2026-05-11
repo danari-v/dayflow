@@ -939,10 +939,14 @@ async function fetchAll() {
 // ══════════════════════════════════════════════
 function getTodayTodos() {
   const d = currentDate;
-  const dow = d.getDay(); // 0=Sun
+  const dow = d.getDay();
   const ds = todayStr(d);
 
   return todos.filter(t => {
+    const from = t.valid_from || '2000-01-01';
+    const until = t.valid_until || '9999-12-31';
+    if (ds < from || ds > until) return false;
+
     if (t.type === 'oneoff') return t.date === ds;
     if (t.type === 'routine') return true;
     if (t.type === 'task') {
@@ -1088,14 +1092,34 @@ async function saveTodo() {
     ? [...document.querySelectorAll('.day-cb:checked')].map(cb => parseInt(cb.value))
     : (type === 'routine' ? [0,1,2,3,4,5,6] : null);
   const date = type === 'oneoff' ? todayStr() : null;
-
-  const payload = { text, time, type, repeat_days, date };
+  const today = todayStr();
 
   if (editId) {
-    await sbFetch(`df_todos?id=eq.${editId}`, 'PATCH', payload);
-    const idx = todos.findIndex(t => t.id === editId);
-    if (idx >= 0) todos[idx] = { ...todos[idx], ...payload };
+    const oldTodo = todos.find(t => t.id === editId);
+    // 원데이는 과거기록 보호 불필요 → 그냥 덮어쓰기
+    if (oldTodo && oldTodo.type === 'oneoff') {
+      const payload = { text, time, type, repeat_days, date };
+      await sbFetch(`df_todos?id=eq.${editId}`, 'PATCH', payload);
+      const idx = todos.findIndex(t => t.id === editId);
+      if (idx >= 0) todos[idx] = { ...todos[idx], ...payload };
+    } else {
+      // 데일리/스케쥴: 기존 항목은 어제까지로 종료, 오늘부터 새 항목 생성
+      const yesterday = new Date(currentDate);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = todayStr(yesterday);
+
+      // 기존 항목 valid_until을 어제로 설정
+      await sbFetch(`df_todos?id=eq.${editId}`, 'PATCH', { valid_until: yesterdayStr });
+      const idx = todos.findIndex(t => t.id === editId);
+      if (idx >= 0) todos[idx] = { ...todos[idx], valid_until: yesterdayStr };
+
+      // 새 항목 생성 (오늘부터 유효)
+      const newPayload = { text, time, type, repeat_days, date, valid_from: today, valid_until: '9999-12-31' };
+      const res = await sbFetch('df_todos', 'POST', newPayload);
+      if (Array.isArray(res) && res[0]) todos.push(res[0]);
+    }
   } else {
+    const payload = { text, time, type, repeat_days, date, valid_from: today, valid_until: '9999-12-31' };
     const res = await sbFetch('df_todos', 'POST', payload);
     if (Array.isArray(res) && res[0]) todos.push(res[0]);
   }
@@ -1272,8 +1296,10 @@ async function runAiAnalysis() {
 //  MANAGE VIEW
 // ══════════════════════════════════════════════
 function renderManage() {
-  const routines = todos.filter(t => t.type === 'routine');
-  const tasks = todos.filter(t => t.type === 'task');
+  const today = todayStr();
+  const active = todos.filter(t => (t.valid_until || '9999-12-31') >= today);
+  const routines = active.filter(t => t.type === 'routine');
+  const tasks = active.filter(t => t.type === 'task');
 
   const renderList = (items, elId) => {
     const el = document.getElementById(elId);
