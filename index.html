@@ -1240,53 +1240,116 @@ function calcStats() {
 async function runAiAnalysis() {
   const el = document.getElementById('ai-summary-text');
 
-  // Build summary data
+  // 최근 30일 범위
   const now = new Date();
-  const from = new Date(now); from.setDate(now.getDate() - 30);
+  const from = new Date(now); from.setDate(now.getDate() - 29);
   const fromStr = localDateStr(from);
-  const recentLogs = logs.filter(l => l.date >= fromStr);
+  const toStr = localDateStr(now);
 
-  const dayMap = {};
-  recentLogs.forEach(l => {
-    dayMap[l.date] = (dayMap[l.date] || 0) + 1;
-  });
+  // 날짜 목록 생성 (최근 30일)
+  const dateRange = [];
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(from);
+    d.setDate(from.getDate() + i);
+    dateRange.push(localDateStr(d));
+  }
 
-  const routineNames = todos.filter(t => t.type === 'routine').map(t => t.text).join(', ');
-  const taskNames = todos.filter(t => t.type === 'task').map(t => t.text).join(', ');
-  const avgPerDay = recentLogs.length ? (recentLogs.length / 30).toFixed(1) : 0;
-  const bestDay = Object.entries(dayMap).sort((a,b) => b[1]-a[1])[0];
+  // 항목별 완료율 계산
+  const itemStats = [];
 
-  const prompt = `다음은 나의 최근 30일 투두리스트 데이터야:
-- 데일리 항목: ${routineNames || '없음'}
-- 스케쥴 항목: ${taskNames || '없음'}
-- 일평균 완료: ${avgPerDay}개
-- 가장 많이 완료한 날: ${bestDay ? bestDay[0] + ' (' + bestDay[1] + '개)' : '없음'}
-- 총 완료 기록: ${recentLogs.length}개
+  const activeTodos = todos.filter(t => t.type !== 'oneoff');
 
-이 데이터를 바탕으로 패턴 분석과 개선 제안을 한국어로 3-4문장으로 따뜻하게 요약해줘. 잘 하는 부분은 칭찬하고 개선할 부분은 부드럽게 알려줘.`;
+  for (const todo of activeTodos) {
+    const validFrom = todo.valid_from || '2000-01-01';
+    const validUntil = todo.valid_until || '9999-12-31';
+
+    // 이 항목이 활성화된 날짜만 추림
+    const expectedDays = dateRange.filter(ds => {
+      if (ds < validFrom || ds > validUntil) return false;
+      if (todo.type === 'routine') return true;
+      if (todo.type === 'task') {
+        const dow = new Date(ds + 'T12:00:00').getDay();
+        return (todo.repeat_days || []).includes(dow);
+      }
+      return false;
+    });
+
+    if (expectedDays.length === 0) continue;
+
+    // 실제 완료한 날짜 수
+    const doneDays = expectedDays.filter(ds =>
+      logs.some(l => l.todo_id === todo.id && l.date === ds)
+    ).length;
+
+    const rate = Math.round(doneDays / expectedDays.length * 100);
+    itemStats.push({ text: todo.text, type: todo.type, done: doneDays, expected: expectedDays.length, rate });
+  }
+
+  // 완료율 높은 순으로 정렬
+  itemStats.sort((a, b) => b.rate - a.rate);
+
+  if (itemStats.length === 0) {
+    el.innerHTML = '<p style="color:var(--ink-muted);font-size:13px;">아직 데이터가 부족해요. 며칠 더 사용하면 분석이 가능해요!</p>';
+    return;
+  }
+
+  // 항목별 완료율 표 만들기
+  const rateEmoji = r => r >= 80 ? '✅' : r >= 50 ? '⚠️' : '🔴';
+  const tableLines = itemStats.map(s =>
+    `${rateEmoji(s.rate)} ${s.text} (${s.type === 'routine' ? '데일리' : '스케쥴'}) → ${s.done}/${s.expected}일 완료 (${s.rate}%)`
+  ).join('\n');
+
+  const top3 = itemStats.slice(0, 3).map(s => s.text).join(', ');
+  const bottom3 = [...itemStats].reverse().slice(0, 3).map(s => s.text).join(', ');
+  const avgRate = Math.round(itemStats.reduce((s, i) => s + i.rate, 0) / itemStats.length);
+
+  const prompt = `다음은 나의 최근 30일 항목별 투두리스트 완료율 데이터야:
+
+${tableLines}
+
+전체 평균 완료율: ${avgRate}%
+완료율 높은 항목: ${top3}
+완료율 낮은 항목: ${bottom3}
+
+이 데이터를 바탕으로:
+1. 잘 되고 있는 항목을 칭찬해줘
+2. 완료율이 낮은 항목에 대해 왜 그럴 수 있는지, 어떻게 개선할 수 있는지 부드럽게 제안해줘
+3. 전체적인 패턴에 대한 따뜻한 한마디로 마무리해줘
+한국어로 답변해줘.`;
+
+  // 미리보기 테이블 렌더링
+  const previewRows = itemStats.map(s => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:14px">${rateEmoji(s.rate)}</span>
+      <span style="flex:1;font-size:13px;font-weight:500">${s.text}</span>
+      <span style="font-size:11px;color:var(--ink-muted)">${s.type === 'routine' ? '데일리' : '스케쥴'}</span>
+      <span style="font-size:12px;font-weight:700;min-width:36px;text-align:right;color:${s.rate >= 80 ? 'var(--routine)' : s.rate >= 50 ? '#C87D2F' : 'var(--accent)'}">${s.rate}%</span>
+    </div>`).join('');
 
   el.innerHTML = `
-    <div style="font-size:13px;line-height:1.8;color:var(--ink);">
-      <p style="margin-bottom:12px;">아래 버튼을 눌러 분석 데이터를 복사한 뒤,<br><strong>claude.ai</strong> 에 붙여넣기 하면 AI 분석을 받을 수 있어요 🐰</p>
-      <div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;color:var(--ink-muted);margin-bottom:12px;white-space:pre-wrap;word-break:break-all;">${prompt}</div>
-    </div>`;
+    <div style="margin-bottom:14px">
+      <div style="font-size:12px;color:var(--ink-muted);margin-bottom:10px;">최근 30일 항목별 완료율 · 전체 평균 <strong>${avgRate}%</strong></div>
+      ${previewRows}
+    </div>
+    <p style="font-size:12px;color:var(--ink-muted);line-height:1.7;margin-bottom:10px;">
+      📋 아래 버튼으로 복사 후 <strong>claude.ai</strong>에 붙여넣으면 상세 분석을 받을 수 있어요
+    </p>`;
 
-  // Copy button
   const copyBtn = document.createElement('button');
   copyBtn.className = 'btn btn-primary';
-  copyBtn.style.cssText = 'width:100%;font-size:13px;margin-top:4px';
-  copyBtn.textContent = '📋 분석 데이터 복사하기';
+  copyBtn.style.cssText = 'width:100%;font-size:13px;';
+  copyBtn.textContent = '📋 AI 분석용 데이터 복사하기';
   copyBtn.onclick = async () => {
     try {
       await navigator.clipboard.writeText(prompt);
       copyBtn.textContent = '✅ 복사됐어요! claude.ai에 붙여넣기 해보세요';
       copyBtn.style.background = 'var(--routine)';
       setTimeout(() => {
-        copyBtn.textContent = '📋 분석 데이터 복사하기';
+        copyBtn.textContent = '📋 AI 분석용 데이터 복사하기';
         copyBtn.style.background = '';
       }, 3000);
     } catch(e) {
-      copyBtn.textContent = '❌ 복사 실패 - 위 텍스트를 직접 선택해주세요';
+      copyBtn.textContent = '❌ 복사 실패 - 텍스트를 직접 선택해주세요';
     }
   };
   el.appendChild(copyBtn);
