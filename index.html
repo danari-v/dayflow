@@ -501,6 +501,70 @@
     /* SCROLLBAR */
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-thumb{background:var(--brown-pale);border-radius:2px;}
+
+    /* ══════════════════════════════
+       MONEY VIEW
+    ══════════════════════════════ */
+    .money-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .money-nav{display:flex;align-items:center;gap:10px;}
+    .money-month-label{font-family:'Gaegu',cursive;font-size:20px;font-weight:700;min-width:110px;text-align:center;}
+    .cal-nav-btn{
+      background:var(--pink-light);border:1px solid var(--pink);border-radius:8px;
+      width:28px;height:28px;cursor:pointer;font-size:14px;color:var(--pink-dark);
+      display:flex;align-items:center;justify-content:center;transition:all 0.15s;
+    }
+    .cal-nav-btn:hover{background:var(--pink);color:white;}
+
+    .money-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+    @media(max-width:480px){.money-summary{grid-template-columns:1fr;}}
+    .money-sum-card{
+      background:var(--white);border-radius:12px;border:2px solid var(--brown-pale);
+      padding:14px;text-align:center;
+    }
+    .money-sum-card.income{border-color:#C8E2D5;background:#F4FAF7;}
+    .money-sum-card.expense{border-color:#F5D5E0;background:#FEF5F8;}
+    .money-sum-card.balance{border-color:#E2D9C8;background:var(--cream2);}
+    .money-sum-icon{font-size:20px;margin-bottom:4px;}
+    .money-sum-label{font-size:11px;color:var(--text-muted);margin-bottom:4px;}
+    .money-sum-amt{font-family:'Gaegu',cursive;font-size:22px;font-weight:700;}
+    .money-sum-card.income .money-sum-amt{color:#2E6B4F;}
+    .money-sum-card.expense .money-sum-amt{color:var(--pink-dark);}
+    .money-sum-card.balance .money-sum-amt{color:var(--text);}
+
+    /* Category donut-style bars */
+    .cat-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .cat-label{font-size:12px;font-weight:700;min-width:72px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cat-bar-wrap{flex:1;height:10px;background:var(--brown-pale);border-radius:5px;overflow:hidden;}
+    .cat-bar{height:100%;border-radius:5px;transition:width 0.4s ease;}
+    .cat-amt{font-size:11px;font-weight:700;color:var(--text-muted);min-width:64px;text-align:right;white-space:nowrap;}
+
+    /* Transaction list */
+    .money-item{
+      display:flex;align-items:center;gap:10px;padding:9px 0;
+      border-bottom:1px dashed var(--brown-pale);
+    }
+    .money-item:last-child{border-bottom:none;}
+    .money-item-cat{
+      width:32px;height:32px;border-radius:10px;display:flex;align-items:center;
+      justify-content:center;font-size:16px;flex-shrink:0;background:var(--pink-light);
+    }
+    .money-item-info{flex:1;min-width:0;}
+    .money-item-text{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .money-item-sub{font-size:11px;color:var(--text-muted);margin-top:1px;}
+    .money-item-amt{font-size:14px;font-weight:800;white-space:nowrap;}
+    .money-item-amt.income{color:#2E6B4F;}
+    .money-item-amt.expense{color:var(--pink-dark);}
+    .money-item-actions{display:flex;gap:3px;opacity:0;transition:opacity 0.15s;}
+    .money-item:hover .money-item-actions{opacity:1;}
+    .money-empty{text-align:center;padding:24px;color:var(--text-muted);font-size:13px;}
+
+    /* Cat buttons in modal */
+    .cat-btn{
+      padding:6px 10px;border-radius:8px;border:1.5px solid var(--brown-pale);
+      font-size:12px;font-weight:700;background:var(--cream2);color:var(--text-muted);
+      cursor:pointer;transition:all 0.15s;
+    }
+    .cat-btn.active{background:var(--pink-light);border-color:var(--pink);color:var(--pink-dark);}
   </style>
 </head>
 <body>
@@ -565,6 +629,7 @@ document.head.appendChild(appleLink);
       <button class="nav-tab active" onclick="showView('home',this)">홈</button>
       <button class="nav-tab" onclick="showView('stats',this)">분석</button>
       <button class="nav-tab" onclick="showView('manage',this)">관리</button>
+      <button class="nav-tab" onclick="showView('money',this)">가계부</button>
     </div>
   </header>
 
@@ -601,23 +666,14 @@ document.head.appendChild(appleLink);
       </div>
 
       <div class="today-cols">
-        <!-- LEFT: todo list -->
+        <!-- LEFT: timeline as main -->
         <div>
-          <div class="todo-card">
-            <div class="todo-card-header">
-              <span class="todo-card-title">📋 할 일 목록</span>
+          <div class="timeline-card" style="margin-top:0">
+            <div class="timeline-header" style="cursor:default">
+              <span class="timeline-title">⏱ 타임라인</span>
               <span class="todo-count-badge" id="todo-count-badge">0개</span>
             </div>
-            <div class="todo-list-inner" id="todo-list-inner"></div>
-          </div>
-
-          <!-- TIMELINE -->
-          <div class="timeline-card">
-            <div class="timeline-header" onclick="toggleTimeline()">
-              <span class="timeline-title">⏱ 타임라인</span>
-              <span class="timeline-toggle" id="tl-toggle-txt">펼치기 ▾</span>
-            </div>
-            <div class="timeline-body" id="timeline-body"></div>
+            <div class="timeline-body open" id="timeline-body"></div>
           </div>
         </div>
 
@@ -703,6 +759,64 @@ document.head.appendChild(appleLink);
         <button class="manage-add-btn" onclick="openTodoModal()">+ 새 항목 추가</button>
       </div>
     </div>
+
+    <!-- ── MONEY ── -->
+    <div class="view" id="view-money">
+
+      <!-- Month nav -->
+      <div class="money-header-row">
+        <div class="money-nav">
+          <button class="cal-nav-btn" onclick="changeMoneyMonth(-1)">‹</button>
+          <span class="money-month-label" id="money-month-label"></span>
+          <button class="cal-nav-btn" onclick="changeMoneyMonth(1)">›</button>
+        </div>
+        <button class="manage-add-btn" onclick="openMoneyModal()">+ 내역 추가</button>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="money-summary">
+        <div class="money-sum-card income">
+          <div class="money-sum-icon">📈</div>
+          <div class="money-sum-label">이번 달 수입</div>
+          <div class="money-sum-amt" id="sum-income">₩0</div>
+        </div>
+        <div class="money-sum-card expense">
+          <div class="money-sum-icon">📉</div>
+          <div class="money-sum-label">이번 달 지출</div>
+          <div class="money-sum-amt" id="sum-expense">₩0</div>
+        </div>
+        <div class="money-sum-card balance">
+          <div class="money-sum-icon">💰</div>
+          <div class="money-sum-label">잔액</div>
+          <div class="money-sum-amt" id="sum-balance">₩0</div>
+        </div>
+      </div>
+
+      <!-- Category chart -->
+      <div class="chart-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">📊 카테고리별 지출</div>
+          <div class="period-tabs" style="margin-bottom:0">
+            <button class="period-tab active" id="mcat-expense-btn" onclick="setMoneyChartType('expense',this)">지출</button>
+            <button class="period-tab" id="mcat-income-btn" onclick="setMoneyChartType('income',this)">수입</button>
+          </div>
+        </div>
+        <div id="cat-chart"></div>
+      </div>
+
+      <!-- Monthly trend chart -->
+      <div class="chart-card" style="margin-bottom:14px">
+        <div class="chart-title">📈 월별 추이</div>
+        <div class="bar-chart" id="money-trend-chart" style="height:130px"></div>
+      </div>
+
+      <!-- Transaction list -->
+      <div class="chart-card">
+        <div class="chart-title">🧾 내역</div>
+        <div id="money-list"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -874,6 +988,7 @@ async function fetchAll() {
     events = await sbFetch('df_events','GET',null,'?order=date.asc');
     if(!Array.isArray(events))events=[];
   } catch(e){events=[];}
+  await fetchMoney();
 }
 
 // ══════════════════════════════════════════════
@@ -1026,7 +1141,6 @@ function isDone(todoId) { return logs.some(l=>l.todo_id===todoId&&l.date===today
 function renderToday() {
   updateTodayChip();
   const items = getTodayTodos();
-  renderTodoList(items);
   renderTimeline(items.filter(t=>t.time).sort((a,b)=>a.time.localeCompare(b.time)));
   updateProgress(items);
   document.getElementById('todo-count-badge').textContent = items.length+'개';
@@ -1339,6 +1453,226 @@ async function runAiAnalysis() {
   el.appendChild(copyBtn);
 }
 
+
+// ══════════════════════════════════════════════
+//  MONEY / 가계부
+// ══════════════════════════════════════════════
+let moneyRecords = [];
+let moneyViewDate = new Date();
+let moneyType = 'expense';
+let moneyCat = '';
+let moneyChartType = 'expense';
+
+const EXPENSE_CATS = [
+  {key:'food',    label:'🍱 식비'},
+  {key:'cafe',    label:'☕ 카페'},
+  {key:'trans',   label:'🚌 교통'},
+  {key:'shop',    label:'🛍 쇼핑'},
+  {key:'health',  label:'💊 건강'},
+  {key:'sport',   label:'🎾 스포츠'},
+  {key:'beauty',  label:'💄 뷰티'},
+  {key:'hobby',   label:'🎨 취미'},
+  {key:'house',   label:'🏠 주거'},
+  {key:'edu',     label:'📚 교육'},
+  {key:'sub',     label:'📱 구독'},
+  {key:'etc',     label:'📦 기타'},
+];
+const INCOME_CATS = [
+  {key:'salary',  label:'💼 급여'},
+  {key:'extra',   label:'💰 부수입'},
+  {key:'gift',    label:'🎁 선물'},
+  {key:'refund',  label:'↩️ 환급'},
+  {key:'etc',     label:'📦 기타'},
+];
+
+async function fetchMoney() {
+  try {
+    const from = new Date(moneyViewDate.getFullYear(), moneyViewDate.getMonth()-2, 1);
+    const fromStr = localDateStr(from);
+    moneyRecords = await sbFetch('df_money','GET',null,`?date=gte.${fromStr}&order=date.desc`);
+    if(!Array.isArray(moneyRecords)) moneyRecords = [];
+  } catch(e) { moneyRecords = []; }
+}
+
+function renderMoney() {
+  const y = moneyViewDate.getFullYear();
+  const m = moneyViewDate.getMonth();
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('money-month-label').textContent = `${y}년 ${months[m]}`;
+
+  const monthStr = `${y}-${String(m+1).padStart(2,'0')}`;
+  const monthRecs = moneyRecords.filter(r => r.date.startsWith(monthStr));
+
+  const income  = monthRecs.filter(r=>r.mtype==='income').reduce((s,r)=>s+Number(r.amount),0);
+  const expense = monthRecs.filter(r=>r.mtype==='expense').reduce((s,r)=>s+Number(r.amount),0);
+  const balance = income - expense;
+
+  document.getElementById('sum-income').textContent  = '₩'+income.toLocaleString();
+  document.getElementById('sum-expense').textContent = '₩'+expense.toLocaleString();
+  const balEl = document.getElementById('sum-balance');
+  balEl.textContent = (balance>=0?'+':'')+'₩'+balance.toLocaleString();
+  balEl.style.color = balance>=0 ? '#2E6B4F' : 'var(--pink-dark)';
+
+  renderCatChart(monthRecs);
+  renderMoneyTrend();
+  renderMoneyList(monthRecs);
+}
+
+function setMoneyChartType(t, btn) {
+  moneyChartType = t;
+  document.querySelectorAll('#mcat-expense-btn,#mcat-income-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const y = moneyViewDate.getFullYear(), m = moneyViewDate.getMonth();
+  const monthStr = `${y}-${String(m+1).padStart(2,'0')}`;
+  const monthRecs = moneyRecords.filter(r=>r.date.startsWith(monthStr));
+  renderCatChart(monthRecs);
+}
+
+function renderCatChart(recs) {
+  const cats = moneyChartType==='expense' ? EXPENSE_CATS : INCOME_CATS;
+  const filtered = recs.filter(r=>r.mtype===moneyChartType);
+  const total = filtered.reduce((s,r)=>s+Number(r.amount),0);
+  const catTotals = cats.map(cat => ({
+    ...cat,
+    amt: filtered.filter(r=>r.cat===cat.key).reduce((s,r)=>s+Number(r.amount),0)
+  })).filter(c=>c.amt>0).sort((a,b)=>b.amt-a.amt);
+
+  const colors = ['#F2A7BE','#F5C4A8','#A8D4C8','#A8B8D4','#C8A8D4','#D4C8A8','#D4A8A8','#A8D4A8'];
+  const el = document.getElementById('cat-chart');
+  if(!catTotals.length){el.innerHTML='<div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted)">내역이 없어요 🌸</div>';return;}
+  el.innerHTML = catTotals.map((cat,i)=>`
+    <div class="cat-row">
+      <span class="cat-label">${cat.label}</span>
+      <div class="cat-bar-wrap">
+        <div class="cat-bar" style="width:${total?Math.round(cat.amt/total*100):0}%;background:${colors[i%colors.length]}"></div>
+      </div>
+      <span class="cat-amt">₩${cat.amt.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+function renderMoneyTrend() {
+  // Last 6 months
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(moneyViewDate.getFullYear(), moneyViewDate.getMonth()-i, 1);
+    months.push({
+      label: (d.getMonth()+1)+'월',
+      str: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+    });
+  }
+  const data = months.map(m=>{
+    const recs = moneyRecords.filter(r=>r.date.startsWith(m.str));
+    const income  = recs.filter(r=>r.mtype==='income').reduce((s,r)=>s+Number(r.amount),0);
+    const expense = recs.filter(r=>r.mtype==='expense').reduce((s,r)=>s+Number(r.amount),0);
+    return {...m, income, expense};
+  });
+  const maxVal = Math.max(...data.map(d=>Math.max(d.income,d.expense)),1);
+  const el = document.getElementById('money-trend-chart');
+  el.innerHTML = data.map(d=>`
+    <div class="bar-col" style="gap:2px">
+      <div style="display:flex;gap:2px;align-items:flex-end;width:100%;justify-content:center;height:100px">
+        <div style="width:42%;border-radius:4px 4px 0 0;background:#A8D4C8;height:${Math.max(d.income/maxVal*100,d.income?2:0)}%;transition:height 0.4s;min-width:6px" title="수입"></div>
+        <div style="width:42%;border-radius:4px 4px 0 0;background:var(--pink);height:${Math.max(d.expense/maxVal*100,d.expense?2:0)}%;transition:height 0.4s;min-width:6px" title="지출"></div>
+      </div>
+      <div class="bar-lbl">${d.label}</div>
+    </div>`).join('');
+}
+
+function renderMoneyList(recs) {
+  const el = document.getElementById('money-list');
+  if(!recs.length){el.innerHTML='<div class="money-empty">이번 달 내역이 없어요 🌸</div>';return;}
+  const allCats = [...EXPENSE_CATS,...INCOME_CATS];
+  el.innerHTML = recs.map(r=>{
+    const cat = allCats.find(c=>c.key===r.cat)||{label:'📦 기타'};
+    const icon = cat.label.split(' ')[0];
+    const name = cat.label.split(' ').slice(1).join(' ');
+    return `<div class="money-item">
+      <div class="money-item-cat">${icon}</div>
+      <div class="money-item-info">
+        <div class="money-item-text">${r.text}</div>
+        <div class="money-item-sub">${name} · ${r.date}</div>
+      </div>
+      <span class="money-item-amt ${r.mtype}">${r.mtype==='income'?'+':'-'}₩${Number(r.amount).toLocaleString()}</span>
+      <div class="money-item-actions">
+        <button class="act-btn" onclick="openMoneyModal('${r.id}')">✎</button>
+        <button class="act-btn del" onclick="deleteMoney('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function changeMoneyMonth(offset) {
+  moneyViewDate = new Date(moneyViewDate.getFullYear(), moneyViewDate.getMonth()+offset, 1);
+  renderMoney();
+}
+
+// Modal
+function openMoneyModal(id=null) {
+  const r = id ? moneyRecords.find(x=>x.id===id) : null;
+  moneyType = r ? r.mtype : 'expense';
+  moneyCat = r ? r.cat : '';
+  document.getElementById('m-text').value = r ? r.text : '';
+  document.getElementById('m-amount').value = r ? r.amount : '';
+  document.getElementById('m-date').value = r ? r.date : localDateStr(new Date());
+  document.getElementById('m-edit-id').value = r ? r.id : '';
+  document.getElementById('money-modal-title').textContent = r ? '내역 수정 💰' : '내역 추가 💰';
+  document.querySelectorAll('#mtype-expense,#mtype-income').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mtype-'+moneyType).classList.add('active');
+  renderCatButtons();
+  document.getElementById('money-modal').classList.add('open');
+}
+function closeMoneyModal() { document.getElementById('money-modal').classList.remove('open'); }
+
+function setMoneyType(t, btn) {
+  moneyType = t;
+  moneyCat = '';
+  document.querySelectorAll('#mtype-expense,#mtype-income').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCatButtons();
+}
+
+function renderCatButtons() {
+  const cats = moneyType==='expense' ? EXPENSE_CATS : INCOME_CATS;
+  const el = document.getElementById('m-cat-btns');
+  el.innerHTML = cats.map(cat=>`
+    <button class="cat-btn ${moneyCat===cat.key?'active':''}" onclick="selectCat('${cat.key}',this)">${cat.label}</button>
+  `).join('');
+}
+
+function selectCat(key, btn) {
+  moneyCat = key;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function saveMoney() {
+  const text = document.getElementById('m-text').value.trim();
+  const amount = parseFloat(document.getElementById('m-amount').value);
+  if(!text) return alert('내용을 입력해주세요.');
+  if(!amount||amount<=0) return alert('금액을 입력해주세요.');
+  if(!moneyCat) return alert('카테고리를 선택해주세요.');
+  const date = document.getElementById('m-date').value || localDateStr(new Date());
+  const editId = document.getElementById('m-edit-id').value;
+  const payload = {text, amount, date, mtype: moneyType, cat: moneyCat};
+  if(editId) {
+    await sbFetch(`df_money?id=eq.${editId}`,'PATCH',payload);
+    const i = moneyRecords.findIndex(r=>r.id===editId);
+    if(i>=0) moneyRecords[i] = {...moneyRecords[i],...payload};
+  } else {
+    const res = await sbFetch('df_money','POST',payload);
+    if(Array.isArray(res)&&res[0]) moneyRecords.push(res[0]);
+  }
+  closeMoneyModal();
+  renderMoney();
+}
+
+async function deleteMoney(id) {
+  if(!confirm('삭제할까요?')) return;
+  await sbFetch(`df_money?id=eq.${id}`,'DELETE');
+  moneyRecords = moneyRecords.filter(r=>r.id!==id);
+  renderMoney();
+}
+
 // ══════════════════════════════════════════════
 //  NAV
 // ══════════════════════════════════════════════
@@ -1349,6 +1683,7 @@ function showView(name,btn) {
   btn.classList.add('active');
   if(name==='stats'){renderStats();}
   if(name==='manage'){renderManage();}
+  if(name==='money'){renderMoney();}
 }
 
 // ══════════════════════════════════════════════
@@ -1356,5 +1691,39 @@ function showView(name,btn) {
 // ══════════════════════════════════════════════
 window.addEventListener('load',()=>{ if(checkConfig()) init(); });
 </script>
+
+<!-- MONEY MODAL -->
+<div class="modal-overlay" id="money-modal">
+  <div class="modal">
+    <h3 id="money-modal-title">내역 추가 💰</h3>
+    <div class="event-type-row" style="margin-bottom:14px">
+      <button class="etype-btn active" id="mtype-expense" onclick="setMoneyType('expense',this)">📉 지출</button>
+      <button class="etype-btn" id="mtype-income" onclick="setMoneyType('income',this)">📈 수입</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">내용</label>
+      <input class="form-input" id="m-text" placeholder="무엇에 썼어?"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">금액 (원)</label>
+        <input class="form-input" id="m-amount" type="number" placeholder="0"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">날짜</label>
+        <input class="form-input" id="m-date" type="date"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">카테고리</label>
+      <div id="m-cat-btns" class="day-checkboxes" style="gap:6px;flex-wrap:wrap"></div>
+    </div>
+    <input type="hidden" id="m-edit-id"/>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeMoneyModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveMoney()">저장 🎀</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
