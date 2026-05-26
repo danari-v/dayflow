@@ -2154,78 +2154,83 @@ async function runAiAnalysis() {
   }
   itemStats.sort((a,b)=>b.rate-a.rate);
 
-  // Money stats
+  // Money
   const periodMoney = moneyRecords.filter(r=>r.date>=fromStr);
   const totalExpense = periodMoney.filter(r=>r.mtype==='expense').reduce((s,r)=>s+Number(r.amount),0);
   const totalIncome  = periodMoney.filter(r=>r.mtype==='income').reduce((s,r)=>s+Number(r.amount),0);
   const catMap = {};
   periodMoney.filter(r=>r.mtype==='expense').forEach(r=>{ catMap[r.cat]=(catMap[r.cat]||0)+Number(r.amount); });
   const topCats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,3)
-    .map(([k,v])=>`${k}(₩${v.toLocaleString()})`).join(', ');
+    .map(([k,v])=>k+'('+String.fromCharCode(8361)+v.toLocaleString()+')').join(', ');
 
-  // Exercise stats
+  // Exercise
   const periodEx = exerciseRecords.filter(e=>e.date>=fromStr);
   const totalMin = periodEx.reduce((s,e)=>s+(e.duration_min||0),0);
   const exTypeMap = {};
   periodEx.forEach(e=>{ exTypeMap[e.etype]=(exTypeMap[e.etype]||0)+1; });
-  const topEx = Object.entries(exTypeMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k}(${v}회)`).join(', ');
+  const topEx = Object.entries(exTypeMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>k+'('+v+'회)').join(', ');
 
   // Weight
   const periodWeight = weightRecords.filter(w=>w.date>=fromStr);
   const weightLine = periodWeight.length>=2
-    ? `시작 ${periodWeight[0].weight}kg → 현재 ${periodWeight[periodWeight.length-1].weight}kg`
+    ? '시작 '+periodWeight[0].weight+'kg → 현재 '+periodWeight[periodWeight.length-1].weight+'kg'
     : '기록 부족';
 
   // Vitamin
   const vitDone = vitaminRecords.filter(v=>v.date>=fromStr&&v.taken).length;
   const vitRate = Math.round(vitDone/days*100);
 
-  const todoLines = itemStats.map(s=>`${s.rate>=80?'✅':s.rate>=50?'⚠️':'🔴'} ${s.text} ${s.done}/${s.total}일 (${s.rate}%)`).join('
-');
+  // Build prompt as string concatenation (no template literals with newlines)
+  const rateLabel = currentPeriod==='week'?'최근 7일':currentPeriod==='month'?'최근 1개월':'최근 1년';
+  const todoLines = itemStats.map(s=>(s.rate>=80?'✅':s.rate>=50?'⚠️':'🔴')+' '+s.text+' '+s.done+'/'+s.total+'일 ('+s.rate+'%)').join('\n');
 
-  const prompt = `다음은 나의 ${currentPeriod==='week'?'최근 7일':currentPeriod==='month'?'최근 1개월':'최근 1년'} 생활 데이터야:
+  const promptParts = [
+    '다음은 나의 '+rateLabel+' 생활 데이터야:',
+    '',
+    '[할 일 완료율]',
+    todoLines||'데이터 없음',
+    '',
+    '[재정]',
+    '- 총 지출: '+String.fromCharCode(8361)+totalExpense.toLocaleString()+' / 총 수입: '+String.fromCharCode(8361)+totalIncome.toLocaleString(),
+    '- 주요 지출: '+(topCats||'없음'),
+    '',
+    '[운동]',
+    '- 총 '+periodEx.length+'회, '+totalMin+'분',
+    '- 주요 운동: '+(topEx||'없음'),
+    '',
+    '[건강]',
+    '- 몸무게: '+weightLine,
+    '- 비타민 완료율: '+vitRate+'%',
+    '',
+    '이 데이터를 바탕으로:',
+    '1. 잘 되고 있는 부분 칭찬',
+    '2. 개선이 필요한 부분 부드럽게 제안',
+    '3. 생활 패턴에서 발견되는 흥미로운 상관관계나 인사이트',
+    '4. 따뜻한 마무리 한마디',
+    '한국어로 답변해줘.'
+  ];
+  const prompt = promptParts.join('\n');
 
-[할 일 완료율]
-${todoLines||'데이터 없음'}
+  // Preview rows
+  const previewRows = itemStats.slice(0,5).map(s=>{
+    const emoji = s.rate>=80?'✅':s.rate>=50?'⚠️':'🔴';
+    const color = s.rate>=80?'var(--pink-dark)':s.rate>=50?'#C07030':'#C04040';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--brown-pale)">'
+      +'<span>'+emoji+'</span>'
+      +'<span style="flex:1;font-size:12px;font-weight:700">'+s.text+'</span>'
+      +'<span style="font-size:12px;font-weight:800;color:'+color+'">'+s.rate+'%</span>'
+      +'</div>';
+  }).join('');
 
-[재정]
-- 총 지출: ₩${totalExpense.toLocaleString()} / 총 수입: ₩${totalIncome.toLocaleString()}
-- 주요 지출: ${topCats||'없음'}
-
-[운동]
-- 총 ${periodEx.length}회, ${totalMin}분
-- 주요 운동: ${topEx||'없음'}
-
-[건강]
-- 몸무게: ${weightLine}
-- 비타민 완료율: ${vitRate}%
-
-이 데이터를 바탕으로:
-1. 잘 되고 있는 부분 칭찬
-2. 개선이 필요한 부분 부드럽게 제안
-3. 생활 패턴에서 발견되는 흥미로운 상관관계나 인사이트
-4. 따뜻한 마무리 한마디
-한국어로 답변해줘.`;
-
-  // Preview
-  const previewRows = itemStats.slice(0,5).map(s=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--brown-pale)">
-      <span>${s.rate>=80?'✅':s.rate>=50?'⚠️':'🔴'}</span>
-      <span style="flex:1;font-size:12px;font-weight:700">${s.text}</span>
-      <span style="font-size:12px;font-weight:800;color:${s.rate>=80?'var(--pink-dark)':s.rate>=50?'#C07030':'#C04040'}">${s.rate}%</span>
-    </div>`).join('');
-
-  el.innerHTML = `
-    <div style="margin-bottom:12px;font-size:12px">
-      <div style="font-weight:800;margin-bottom:6px;color:var(--text-muted)">할 일 완료율 TOP</div>
-      ${previewRows||'<div style="color:var(--text-muted)">데이터 없음</div>'}
-      <div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--brown-pale)">
-        💰 지출 <strong>₩${totalExpense.toLocaleString()}</strong> &nbsp;
-        🏃 운동 <strong>${periodEx.length}회</strong> &nbsp;
-        💊 비타민 <strong>${vitRate}%</strong>
-      </div>
-    </div>
-    <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">📋 복사 후 claude.ai에 붙여넣으면 상세 분석을 받을 수 있어요 🐰</p>`;
+  el.innerHTML = '<div style="margin-bottom:12px;font-size:12px">'
+    +'<div style="font-weight:800;margin-bottom:6px;color:var(--text-muted)">할 일 완료율 TOP</div>'
+    +(previewRows||'<div style="color:var(--text-muted)">데이터 없음</div>')
+    +'<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--brown-pale)">'
+    +'💰 지출 <strong>'+String.fromCharCode(8361)+totalExpense.toLocaleString()+'</strong> &nbsp; '
+    +'🏃 운동 <strong>'+periodEx.length+'회</strong> &nbsp; '
+    +'💊 비타민 <strong>'+vitRate+'%</strong>'
+    +'</div></div>'
+    +'<p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">📋 복사 후 claude.ai에 붙여넣으면 상세 분석을 받을 수 있어요 🐰</p>';
 
   const copyBtn = document.createElement('button');
   copyBtn.className = 'btn btn-primary';
