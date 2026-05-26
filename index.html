@@ -565,6 +565,88 @@
       cursor:pointer;transition:all 0.15s;
     }
     .cat-btn.active{background:var(--pink-light);border-color:var(--pink);color:var(--pink-dark);}
+
+    /* Calendar event labels */
+    .cal-day { flex-direction: column; justify-content: flex-start; padding-top: 4px; min-height: 52px; }
+    .cal-day-num { font-size: 13px; line-height: 1; margin-bottom: 2px; }
+    .cal-event-labels { display: flex; flex-direction: column; gap: 1px; width: 100%; padding: 0 2px; }
+    .cal-ev-label {
+      font-size: 9px; font-weight: 700; border-radius: 3px;
+      padding: 1px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      background: var(--pink-light); color: var(--pink-dark); line-height: 1.4;
+    }
+    .cal-ev-label.important { background: #FEF0E8; color: #C45A2A; }
+    .cal-ev-label.holiday   { background: #FFE8E8; color: #C04040; }
+    .cal-day.today .cal-ev-label { background: rgba(255,255,255,0.3); color: white; }
+    /* Donut chart */
+    .donut-wrap { display: flex; align-items: center; gap: 20px; }
+    .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .donut-legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .donut-lbl { flex: 1; font-weight: 700; }
+    .donut-pct { font-weight: 800; color: var(--text-muted); }
+    .donut-amt-lbl { font-size: 11px; color: var(--text-muted); }
+    /* Line chart */
+    .line-chart-wrap { position: relative; width: 100%; }
+    .line-chart-svg { width: 100%; overflow: visible; }
+
+    /* ══════════════════════════════
+       HEALTH VIEW
+    ══════════════════════════════ */
+    .health-quick-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+    @media(max-width:400px){.health-quick-row{grid-template-columns:1fr;}}
+    .health-quick-card{
+      background:var(--white);border-radius:var(--r);border:2px solid var(--brown-pale);
+      padding:14px;box-shadow:var(--shadow-soft);
+    }
+    .health-quick-title{font-family:'Gaegu',cursive;font-size:16px;font-weight:700;margin-bottom:8px;}
+    .health-weight-row{display:flex;flex-direction:column;gap:4px;}
+
+    .vitamin-stamp{
+      font-size:36px;cursor:pointer;display:inline-block;
+      transition:transform 0.2s;filter:grayscale(0.7) opacity(0.4);
+    }
+    .vitamin-stamp.taken{
+      filter:none;
+      animation:stampIn 0.3s ease;
+    }
+    @keyframes stampIn{0%{transform:scale(1.5) rotate(-10deg)}100%{transform:scale(1) rotate(0)}}
+
+    .health-summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+    .health-sum-card{
+      background:var(--white);border-radius:12px;border:2px solid var(--brown-pale);
+      padding:14px;text-align:center;
+    }
+    .health-sum-icon{font-size:18px;margin-bottom:4px;}
+    .health-sum-val{font-family:'Gaegu',cursive;font-size:20px;font-weight:700;line-height:1.2;}
+    .health-sum-lbl{font-size:10px;color:var(--text-muted);margin-top:3px;}
+
+    /* Exercise today list */
+    .ex-item{
+      display:flex;align-items:center;gap:10px;
+      padding:9px 0;border-bottom:1px dashed var(--brown-pale);
+    }
+    .ex-item:last-child{border-bottom:none;}
+    .ex-icon{width:34px;height:34px;border-radius:10px;background:var(--pink-light);
+      display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .ex-info{flex:1;}
+    .ex-name{font-size:13px;font-weight:700;}
+    .ex-stats{font-size:11px;color:var(--text-muted);margin-top:2px;}
+    .ex-empty{text-align:center;padding:20px;font-size:12px;color:var(--text-muted);}
+
+    /* Exercise calendar */
+    .ex-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+    .ex-cal-day{
+      aspect-ratio:1;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:11px;color:var(--text-muted);
+      cursor:default;position:relative;
+    }
+    .ex-cal-day.has-ex{color:white;font-weight:700;}
+    .ex-cal-day.running{background:#A8D4C8;}
+    .ex-cal-day.tennis{background:#F5C4A8;}
+    .ex-cal-day.other{background:var(--pink);}
+    .ex-cal-day.today-ex{box-shadow:0 0 0 2px var(--pink-dark);}
+    .ex-cal-header{text-align:center;font-size:10px;font-weight:700;color:var(--text-muted);padding:2px 0;}
   </style>
 </head>
 <body>
@@ -630,6 +712,7 @@ document.head.appendChild(appleLink);
       <button class="nav-tab" onclick="showView('stats',this)">분석</button>
       <button class="nav-tab" onclick="showView('manage',this)">관리</button>
       <button class="nav-tab" onclick="showView('money',this)">가계부</button>
+      <button class="nav-tab" onclick="showView('health',this)">건강</button>
     </div>
   </header>
 
@@ -807,13 +890,109 @@ document.head.appendChild(appleLink);
       <!-- Monthly trend chart -->
       <div class="chart-card" style="margin-bottom:14px">
         <div class="chart-title">📈 월별 추이</div>
-        <div class="bar-chart" id="money-trend-chart" style="height:130px"></div>
+        <div class="bar-chart" id="money-trend-chart"></div>
       </div>
 
       <!-- Transaction list -->
       <div class="chart-card">
         <div class="chart-title">🧾 내역</div>
         <div id="money-list"></div>
+      </div>
+    </div>
+
+
+    <!-- ── HEALTH ── -->
+    <div class="view" id="view-health">
+
+      <!-- 날짜 네비 -->
+      <div class="money-header-row">
+        <div class="money-nav">
+          <button class="cal-nav-btn" onclick="changeHealthDate(-1)">‹</button>
+          <span class="money-month-label" id="health-date-label"></span>
+          <button class="cal-nav-btn" onclick="changeHealthDate(1)">›</button>
+        </div>
+        <button class="manage-add-btn" onclick="goHealthToday()">오늘</button>
+      </div>
+
+      <!-- 오늘 빠른 기록 -->
+      <div class="health-quick-row">
+
+        <!-- 몸무게 -->
+        <div class="health-quick-card">
+          <div class="health-quick-title">⚖️ 몸무게</div>
+          <div class="health-weight-row">
+            <input class="form-input" id="hq-weight" type="number" step="0.1" placeholder="kg" style="font-size:18px;font-weight:800;text-align:center"/>
+            <button class="add-btn" style="margin-top:6px;padding:7px" onclick="saveWeight()">저장</button>
+          </div>
+          <div id="hq-weight-today" style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px"></div>
+        </div>
+
+        <!-- 비타민 -->
+        <div class="health-quick-card">
+          <div class="health-quick-title">💊 비타민</div>
+          <div style="text-align:center;padding:8px 0">
+            <div id="vitamin-stamp" class="vitamin-stamp" onclick="toggleVitamin()">💊</div>
+            <div id="vitamin-label" style="font-size:11px;color:var(--text-muted);margin-top:6px">탭해서 체크!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 운동 기록 -->
+      <div class="chart-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="chart-title" style="margin-bottom:0">🏃 오늘의 운동</div>
+          <button class="manage-add-btn" onclick="openExerciseModal()">+ 추가</button>
+        </div>
+        <div id="exercise-today-list"></div>
+      </div>
+
+      <!-- 이번 달 요약 -->
+      <div class="health-summary-row">
+        <div class="health-sum-card">
+          <div class="health-sum-icon">⚖️</div>
+          <div class="health-sum-val" id="hs-weight">–</div>
+          <div class="health-sum-lbl">현재 몸무게</div>
+        </div>
+        <div class="health-sum-card">
+          <div class="health-sum-icon">🏃</div>
+          <div class="health-sum-val" id="hs-exercise">–</div>
+          <div class="health-sum-lbl">이번 달 운동</div>
+        </div>
+        <div class="health-sum-card">
+          <div class="health-sum-icon">💊</div>
+          <div class="health-sum-val" id="hs-vitamin">–</div>
+          <div class="health-sum-lbl">비타민 완료율</div>
+        </div>
+      </div>
+
+      <!-- 몸무게 그래프 -->
+      <div class="chart-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="chart-title" style="margin-bottom:0">⚖️ 몸무게 추이</div>
+          <div class="period-tabs" style="margin-bottom:0">
+            <button class="period-tab active" id="wt-month-btn" onclick="setWeightPeriod('month',this)">1개월</button>
+            <button class="period-tab" id="wt-3month-btn" onclick="setWeightPeriod('3month',this)">3개월</button>
+          </div>
+        </div>
+        <div id="weight-chart"></div>
+      </div>
+
+      <!-- 운동 캘린더 -->
+      <div class="chart-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="chart-title" style="margin-bottom:0">📅 운동 달력</div>
+          <div class="money-nav" style="gap:8px">
+            <button class="cal-nav-btn" onclick="changeExCal(-1)">‹</button>
+            <span style="font-size:13px;font-weight:700" id="ex-cal-label"></span>
+            <button class="cal-nav-btn" onclick="changeExCal(1)">›</button>
+          </div>
+        </div>
+        <div class="ex-cal-grid" id="ex-cal-grid"></div>
+        <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--text-muted)">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--pink);margin-right:3px"></span>운동함</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#A8D4C8;margin-right:3px"></span>러닝</span>
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#F5C4A8;margin-right:3px"></span>테니스</span>
+        </div>
       </div>
     </div>
 
@@ -989,11 +1168,29 @@ async function fetchAll() {
     if(!Array.isArray(events))events=[];
   } catch(e){events=[];}
   await fetchMoney();
+  await fetchHealth();
 }
 
 // ══════════════════════════════════════════════
 //  CALENDAR
 // ══════════════════════════════════════════════
+// 한국 공휴일 (고정 + 2026년 음력 계산 포함)
+const KR_HOLIDAYS = {
+  '01-01': '새해', '03-01': '삼일절', '05-05': '어린이날',
+  '06-06': '현충일', '08-15': '광복절', '10-03': '개천절',
+  '10-09': '한글날', '12-25': '크리스마스',
+  // 2026 음력 공휴일 (양력 변환값)
+  '2026-01-28': '설날연휴', '2026-01-29': '설날', '2026-01-30': '설날연휴',
+  '2026-05-24': '부처님오신날',
+  '2026-09-24': '추석연휴', '2026-09-25': '추석', '2026-09-26': '추석연휴',
+};
+
+function getHoliday(ds) {
+  if (KR_HOLIDAYS[ds]) return KR_HOLIDAYS[ds];
+  const mmdd = ds.slice(5);
+  return KR_HOLIDAYS[mmdd] || null;
+}
+
 function renderCalendar() {
   const y = calViewDate.getFullYear();
   const m = calViewDate.getMonth();
@@ -1013,16 +1210,28 @@ function renderCalendar() {
     const isToday = ds===todayS;
     const isSelected = ds===selectedS;
     const isSun = dow===0, isSat = dow===6;
-    const hasEvent = events.some(e=>e.date===ds);
-    const hasTodo = logs.some(l=>l.date===ds);
+    const holiday = getHoliday(ds);
+    const dayEvents = events.filter(e=>e.date===ds);
+
     const cls = ['cal-day',
       isToday?'today':'',
       isSelected&&!isToday?'selected':'',
       isToday&&isSelected?'today selected':'',
-      isSun?'sun':'', isSat?'sat':''
+      isSun||holiday?'sun':'', isSat?'sat':''
     ].filter(Boolean).join(' ');
-    const dots = (hasEvent?'<div class="cal-dot"></div>':'')+(hasTodo?'<div class="cal-dot todo-dot"></div>':'');
-    html += `<div class="${cls}" onclick="selectDate('${ds}')">${d}${dots?`<div class="cal-dot-wrap">${dots}</div>`:''}</div>`;
+
+    // Build labels: holiday first, then up to 2 events
+    let labels = '';
+    if (holiday) labels += `<div class="cal-ev-label holiday">${holiday}</div>`;
+    dayEvents.slice(0,2).forEach(e => {
+      labels += `<div class="cal-ev-label ${e.etype||''}">${e.time?e.time.slice(0,5)+' ':''}${e.text}</div>`;
+    });
+    if (dayEvents.length > 2) labels += `<div class="cal-ev-label" style="opacity:.6">+${dayEvents.length-2}개</div>`;
+
+    html += `<div class="${cls}" onclick="selectDate('${ds}')">
+      <div class="cal-day-num">${d}</div>
+      ${labels ? `<div class="cal-event-labels">${labels}</div>` : ''}
+    </div>`;
   }
   document.getElementById('cal-days').innerHTML = html;
   renderEventStrip();
@@ -1487,9 +1696,8 @@ const INCOME_CATS = [
 
 async function fetchMoney() {
   try {
-    const from = new Date(moneyViewDate.getFullYear(), moneyViewDate.getMonth()-2, 1);
-    const fromStr = localDateStr(from);
-    moneyRecords = await sbFetch('df_money','GET',null,`?date=gte.${fromStr}&order=date.desc`);
+    // 2026 전체 + 이전 데이터도 가져오기
+    moneyRecords = await sbFetch('df_money','GET',null,'?date=gte.2026-01-01&order=date.asc');
     if(!Array.isArray(moneyRecords)) moneyRecords = [];
   } catch(e) { moneyRecords = []; }
 }
@@ -1537,52 +1745,110 @@ function renderCatChart(recs) {
     amt: filtered.filter(r=>r.cat===cat.key).reduce((s,r)=>s+Number(r.amount),0)
   })).filter(c=>c.amt>0).sort((a,b)=>b.amt-a.amt);
 
-  const colors = ['#F2A7BE','#F5C4A8','#A8D4C8','#A8B8D4','#C8A8D4','#D4C8A8','#D4A8A8','#A8D4A8'];
+  const colors = ['#F2A7BE','#F5C4A8','#A8D4C8','#A8B8D4','#C8A8D4','#D4C8A8','#E8A8A8','#A8D4A8','#D4B8A8','#B8A8D4'];
   const el = document.getElementById('cat-chart');
   if(!catTotals.length){el.innerHTML='<div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted)">내역이 없어요 🌸</div>';return;}
-  el.innerHTML = catTotals.map((cat,i)=>`
-    <div class="cat-row">
-      <span class="cat-label">${cat.label}</span>
-      <div class="cat-bar-wrap">
-        <div class="cat-bar" style="width:${total?Math.round(cat.amt/total*100):0}%;background:${colors[i%colors.length]}"></div>
-      </div>
-      <span class="cat-amt">₩${cat.amt.toLocaleString()}</span>
-    </div>`).join('');
+
+  // SVG donut
+  const size = 120, cx = 60, cy = 60, r = 46, stroke = 18;
+  const circum = 2 * Math.PI * r;
+  let offset = 0;
+  const segments = catTotals.map((cat, i) => {
+    const pct = total ? cat.amt / total : 0;
+    const dash = pct * circum;
+    const seg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+      stroke="${colors[i % colors.length]}" stroke-width="${stroke}"
+      stroke-dasharray="${dash} ${circum - dash}"
+      stroke-dashoffset="${circum * 0.25 - offset}"
+      style="transition:stroke-dashoffset 0.4s"/>`;
+    offset += dash;
+    return seg;
+  }).join('');
+
+  const totalFmt = total>=10000 ? (total/10000).toFixed(1)+'만' : total.toLocaleString();
+  const donutSvg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex-shrink:0">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#EDE0D4" stroke-width="${stroke}"/>
+    ${segments}
+    <text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="10" fill="#7A5C4A" font-weight="700">합계</text>
+    <text x="${cx}" y="${cy+8}" text-anchor="middle" font-size="11" fill="#5C3D2E" font-weight="800">₩${totalFmt}</text>
+  </svg>`;
+
+  const legend = catTotals.map((cat,i) => {
+    const pct = total ? Math.round(cat.amt/total*100) : 0;
+    return `<div class="donut-legend-row">
+      <div class="donut-dot" style="background:${colors[i%colors.length]}"></div>
+      <span class="donut-lbl">${cat.label}</span>
+      <span class="donut-pct">${pct}%</span>
+      <span class="donut-amt-lbl">₩${cat.amt.toLocaleString()}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="donut-wrap">${donutSvg}<div class="donut-legend">${legend}</div></div>`;
 }
 
 function renderMoneyTrend() {
-  // Last 6 months
+  // 2026년 1월~12월 고정
   const months = [];
-  for(let i=5;i>=0;i--){
-    const d = new Date(moneyViewDate.getFullYear(), moneyViewDate.getMonth()-i, 1);
+  for(let m=0; m<12; m++) {
     months.push({
-      label: (d.getMonth()+1)+'월',
-      str: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+      label: (m+1)+'월',
+      str: `2026-${String(m+1).padStart(2,'0')}`
     });
   }
-  const data = months.map(m=>{
-    const recs = moneyRecords.filter(r=>r.date.startsWith(m.str));
+  const data = months.map(mo=>{
+    const recs = moneyRecords.filter(r=>r.date.startsWith(mo.str));
     const income  = recs.filter(r=>r.mtype==='income').reduce((s,r)=>s+Number(r.amount),0);
     const expense = recs.filter(r=>r.mtype==='expense').reduce((s,r)=>s+Number(r.amount),0);
-    return {...m, income, expense};
+    return {...mo, income, expense};
   });
-  const maxVal = Math.max(...data.map(d=>Math.max(d.income,d.expense)),1);
+
+  const maxVal = Math.max(...data.flatMap(d=>[d.income,d.expense]), 1);
+  const W = 340, H = 120, padL = 8, padR = 8, padT = 14, padB = 24;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const n = data.length;
+  const xPos = i => padL + (i / (n-1)) * chartW;
+  const yPos = v => padT + chartH - (v / maxVal) * chartH;
+
+  const makeLine = (key, color) => {
+    const pts = data.map((d,i) => `${xPos(i).toFixed(1)},${yPos(d[key]).toFixed(1)}`).join(' ');
+    const dots = data.map((d,i) => {
+      const x = xPos(i).toFixed(1), y = yPos(d[key]).toFixed(1);
+      const amt = d[key]>=10000?(d[key]/10000).toFixed(0)+'만':d[key]>0?d[key].toLocaleString():'';
+      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${color}" stroke="white" stroke-width="1.5"/>
+        ${d[key]>0?`<text x="${x}" y="${(Number(y)-7).toFixed(0)}" text-anchor="middle" font-size="7" fill="${color}" font-weight="700">${amt}</text>`:''}`;
+    }).join('');
+    return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="6" opacity="0.12"/>
+      ${dots}`;
+  };
+
+  const xLabels = data.map((d,i) =>
+    `<text x="${xPos(i).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="8" fill="#A08070">${d.label}</text>`
+  ).join('');
+
+  const legend = `<text x="${padL}" y="10" font-size="8" fill="#2E6B4F" font-weight="700">● 수입</text>
+    <text x="${padL+36}" y="10" font-size="8" fill="#D4708A" font-weight="700">● 지출</text>`;
+
   const el = document.getElementById('money-trend-chart');
-  el.innerHTML = data.map(d=>`
-    <div class="bar-col" style="gap:2px">
-      <div style="display:flex;gap:2px;align-items:flex-end;width:100%;justify-content:center;height:100px">
-        <div style="width:42%;border-radius:4px 4px 0 0;background:#A8D4C8;height:${Math.max(d.income/maxVal*100,d.income?2:0)}%;transition:height 0.4s;min-width:6px" title="수입"></div>
-        <div style="width:42%;border-radius:4px 4px 0 0;background:var(--pink);height:${Math.max(d.expense/maxVal*100,d.expense?2:0)}%;transition:height 0.4s;min-width:6px" title="지출"></div>
-      </div>
-      <div class="bar-lbl">${d.label}</div>
-    </div>`).join('');
+  el.innerHTML = `<div class="line-chart-wrap">
+    <svg class="line-chart-svg" viewBox="0 0 ${W} ${H}" style="height:${H}px">
+      ${legend}
+      <line x1="${padL}" y1="${padT}" x1="${padL}" y2="${padT+chartH}" stroke="#EDE0D4" stroke-width="0.5"/>
+      ${makeLine('income','#2E6B4F')}
+      ${makeLine('expense','#D4708A')}
+      ${xLabels}
+    </svg>
+  </div>`;
 }
 
 function renderMoneyList(recs) {
   const el = document.getElementById('money-list');
   if(!recs.length){el.innerHTML='<div class="money-empty">이번 달 내역이 없어요 🌸</div>';return;}
+  // 날짜 오름차순 (1일→31일)
+  const sorted = [...recs].sort((a,b)=>a.date.localeCompare(b.date));
   const allCats = [...EXPENSE_CATS,...INCOME_CATS];
-  el.innerHTML = recs.map(r=>{
+  el.innerHTML = sorted.map(r=>{
     const cat = allCats.find(c=>c.key===r.cat)||{label:'📦 기타'};
     const icon = cat.label.split(' ')[0];
     const name = cat.label.split(' ').slice(1).join(' ');
@@ -1673,6 +1939,288 @@ async function deleteMoney(id) {
   renderMoney();
 }
 
+
+// ══════════════════════════════════════════════
+//  HEALTH
+// ══════════════════════════════════════════════
+let weightRecords = [];
+let exerciseRecords = [];
+let vitaminRecords = [];
+let healthDate = new Date();
+let exCalDate = new Date();
+let weightPeriod = 'month';
+let curExType = '';
+
+async function fetchHealth() {
+  try {
+    const from = new Date(); from.setMonth(from.getMonth()-3);
+    const fromStr = localDateStr(from);
+    weightRecords = await sbFetch('df_weight','GET',null,`?date=gte.${fromStr}&order=date.asc`);
+    if(!Array.isArray(weightRecords)) weightRecords=[];
+  } catch(e){weightRecords=[];}
+  try {
+    const from = new Date(); from.setMonth(from.getMonth()-3);
+    exerciseRecords = await sbFetch('df_exercise','GET',null,`?date=gte.${localDateStr(from)}&order=date.asc`);
+    if(!Array.isArray(exerciseRecords)) exerciseRecords=[];
+  } catch(e){exerciseRecords=[];}
+  try {
+    const from = new Date(); from.setMonth(from.getMonth()-1);
+    vitaminRecords = await sbFetch('df_vitamin','GET',null,`?date=gte.${localDateStr(from)}&order=date.asc`);
+    if(!Array.isArray(vitaminRecords)) vitaminRecords=[];
+  } catch(e){vitaminRecords=[];}
+}
+
+function renderHealth() {
+  const ds = localDateStr(healthDate);
+  const days = ['일','월','화','수','목','금','토'];
+  document.getElementById('health-date-label').textContent =
+    `${healthDate.getMonth()+1}월 ${healthDate.getDate()}일 (${days[healthDate.getDay()]})`;
+
+  // Weight today
+  const wToday = weightRecords.find(w=>w.date===ds);
+  document.getElementById('hq-weight').value = wToday ? wToday.weight : '';
+  document.getElementById('hq-weight-today').textContent = wToday ? `✅ ${wToday.weight}kg 기록됨` : '아직 기록 없음';
+
+  // Vitamin today
+  const vToday = vitaminRecords.find(v=>v.date===ds);
+  const taken = vToday && vToday.taken;
+  const stamp = document.getElementById('vitamin-stamp');
+  const lbl = document.getElementById('vitamin-label');
+  stamp.className = 'vitamin-stamp' + (taken ? ' taken' : '');
+  lbl.textContent = taken ? '✅ 오늘 먹었어요!' : '탭해서 체크!';
+
+  // Exercise today
+  const exToday = exerciseRecords.filter(e=>e.date===ds);
+  renderExerciseList(exToday);
+
+  // Summary
+  renderHealthSummary();
+  renderWeightChart();
+  renderExCal();
+}
+
+function renderExerciseList(items) {
+  const el = document.getElementById('exercise-today-list');
+  if(!items.length){
+    el.innerHTML='<div class="ex-empty">오늘 운동 기록이 없어요 🌸</div>';
+    return;
+  }
+  el.innerHTML = items.map(e=>`
+    <div class="ex-item">
+      <div class="ex-icon">${e.etype.split(' ')[0]}</div>
+      <div class="ex-info">
+        <div class="ex-name">${e.etype}</div>
+        <div class="ex-stats">
+          ${e.duration_min?e.duration_min+'분':''}
+          ${e.distance_km?' · '+e.distance_km+'km':''}
+          ${e.calories?' · '+e.calories+'kcal':''}
+          ${e.note?' · '+e.note:''}
+        </div>
+      </div>
+      <div class="todo-actions" style="opacity:1">
+        <button class="act-btn" onclick="openExerciseModal('${e.id}')">✎</button>
+        <button class="act-btn del" onclick="deleteExercise('${e.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderHealthSummary() {
+  // Latest weight
+  const latestW = weightRecords.length ? weightRecords[weightRecords.length-1] : null;
+  document.getElementById('hs-weight').textContent = latestW ? latestW.weight+'kg' : '–';
+
+  // This month exercise count
+  const now = new Date();
+  const monthStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const thisMonthEx = exerciseRecords.filter(e=>e.date.startsWith(monthStr));
+  document.getElementById('hs-exercise').textContent = thisMonthEx.length+'회';
+
+  // Vitamin rate this month (days passed)
+  const daysElapsed = now.getDate();
+  const vitaminDone = vitaminRecords.filter(v=>v.date.startsWith(monthStr)&&v.taken).length;
+  const rate = daysElapsed ? Math.round(vitaminDone/daysElapsed*100) : 0;
+  document.getElementById('hs-vitamin').textContent = rate+'%';
+}
+
+function renderWeightChart() {
+  const el = document.getElementById('weight-chart');
+  const now = new Date();
+  let from = new Date(now);
+  if(weightPeriod==='month') from.setMonth(from.getMonth()-1);
+  else from.setMonth(from.getMonth()-3);
+  const filtered = weightRecords.filter(w=>w.date>=localDateStr(from));
+
+  if(filtered.length<2){
+    el.innerHTML='<div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted)">데이터가 부족해요. 매일 기록하면 그래프가 나타나요! 🌸</div>';
+    return;
+  }
+
+  const W=340,H=100,padL=28,padR=8,padT=14,padB=20;
+  const chartW=W-padL-padR, chartH=H-padT-padB;
+  const weights = filtered.map(w=>Number(w.weight));
+  const minW = Math.min(...weights)-1, maxW = Math.max(...weights)+1;
+  const n = filtered.length;
+  const xPos = i => padL + (i/(n-1))*chartW;
+  const yPos = v => padT + chartH - ((v-minW)/(maxW-minW))*chartH;
+
+  const pts = filtered.map((w,i)=>`${xPos(i).toFixed(1)},${yPos(Number(w.weight)).toFixed(1)}`).join(' ');
+  const dots = filtered.map((w,i)=>{
+    const x=xPos(i).toFixed(1), y=yPos(Number(w.weight)).toFixed(1);
+    const showLabel = i===0||i===n-1||i===Math.floor(n/2);
+    return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--pink)" stroke="white" stroke-width="1.5"/>
+      ${showLabel?`<text x="${x}" y="${(Number(y)-7).toFixed(0)}" text-anchor="middle" font-size="8" fill="var(--pink-dark)" font-weight="700">${w.weight}</text>`:''}`;
+  }).join('');
+
+  // Y axis labels
+  const yLabels = [minW+1, Math.round((minW+maxW)/2), maxW-1].map(v=>
+    `<text x="${padL-3}" y="${yPos(v)+3}" text-anchor="end" font-size="8" fill="#A08070">${v}</text>`
+  ).join('');
+
+  // X axis: first and last date
+  const xLabels = `
+    <text x="${padL}" y="${H-3}" text-anchor="middle" font-size="8" fill="#A08070">${filtered[0].date.slice(5)}</text>
+    <text x="${(padL+W-padR)/2}" y="${H-3}" text-anchor="middle" font-size="8" fill="#A08070">${filtered[Math.floor(n/2)]?.date.slice(5)||''}</text>
+    <text x="${W-padR}" y="${H-3}" text-anchor="middle" font-size="8" fill="#A08070">${filtered[n-1].date.slice(5)}</text>`;
+
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;overflow:visible">
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+chartH}" stroke="#EDE0D4" stroke-width="0.5"/>
+    ${yLabels}
+    <polyline points="${pts}" fill="none" stroke="var(--pink)" stroke-width="2" stroke-linejoin="round"/>
+    <polyline points="${pts}" fill="none" stroke="var(--pink)" stroke-width="8" opacity="0.1"/>
+    ${dots}
+    ${xLabels}
+  </svg>`;
+}
+
+function setWeightPeriod(p,btn) {
+  weightPeriod=p;
+  document.querySelectorAll('#wt-month-btn,#wt-3month-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWeightChart();
+}
+
+function renderExCal() {
+  const y=exCalDate.getFullYear(), m=exCalDate.getMonth();
+  const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('ex-cal-label').textContent=`${y}년 ${months[m]}`;
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const todayS=realToday();
+  const weekDays=['일','월','화','수','목','금','토'];
+  let html=weekDays.map(d=>`<div class="ex-cal-header">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+=`<div class="ex-cal-day"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const exArr=exerciseRecords.filter(e=>e.date===ds);
+    const isToday=ds===todayS;
+    let cls='ex-cal-day';
+    if(exArr.length){
+      const hasRun=exArr.some(e=>e.etype.includes('러닝'));
+      const hasTennis=exArr.some(e=>e.etype.includes('테니스'));
+      cls+=' has-ex '+(hasRun?'running':hasTennis?'tennis':'other');
+    }
+    if(isToday) cls+=' today-ex';
+    html+=`<div class="${cls}" title="${exArr.map(e=>e.etype).join(', ')}">${d}</div>`;
+  }
+  document.getElementById('ex-cal-grid').innerHTML=html;
+}
+
+function changeExCal(offset){
+  exCalDate=new Date(exCalDate.getFullYear(),exCalDate.getMonth()+offset,1);
+  renderExCal();
+}
+
+// ── Weight ──
+async function saveWeight() {
+  const val = parseFloat(document.getElementById('hq-weight').value);
+  if(!val||val<=0) return alert('몸무게를 입력해주세요.');
+  const ds = localDateStr(healthDate);
+  const existing = weightRecords.find(w=>w.date===ds);
+  if(existing) {
+    await sbFetch(`df_weight?id=eq.${existing.id}`,'PATCH',{weight:val});
+    existing.weight=val;
+  } else {
+    const res=await sbFetch('df_weight','POST',{date:ds,weight:val});
+    if(Array.isArray(res)&&res[0]) weightRecords.push(res[0]);
+    weightRecords.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  renderHealth();
+}
+
+// ── Vitamin ──
+async function toggleVitamin() {
+  const ds = localDateStr(healthDate);
+  const existing = vitaminRecords.find(v=>v.date===ds);
+  const newTaken = !(existing&&existing.taken);
+  if(existing) {
+    await sbFetch(`df_vitamin?id=eq.${existing.id}`,'PATCH',{taken:newTaken});
+    existing.taken=newTaken;
+  } else {
+    const res=await sbFetch('df_vitamin','POST',{date:ds,taken:true});
+    if(Array.isArray(res)&&res[0]) vitaminRecords.push(res[0]);
+  }
+  renderHealth();
+}
+
+// ── Exercise Modal ──
+function setExType(t,btn) {
+  curExType=t;
+  document.querySelectorAll('#ex-type-btns .type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function openExerciseModal(id=null) {
+  const e=id?exerciseRecords.find(x=>x.id===id):null;
+  curExType=e?e.etype:'';
+  document.getElementById('ex-duration').value=e?e.duration_min||'':'';
+  document.getElementById('ex-distance').value=e?e.distance_km||'':'';
+  document.getElementById('ex-calories').value=e?e.calories||'':'';
+  document.getElementById('ex-note').value=e?e.note||'':'';
+  document.getElementById('ex-date').value=e?e.date:localDateStr(healthDate);
+  document.getElementById('ex-edit-id').value=e?e.id:'';
+  document.getElementById('exercise-modal-title').textContent=e?'운동 수정 🏃':'운동 기록 🏃';
+  document.querySelectorAll('#ex-type-btns .type-btn').forEach(b=>{
+    b.classList.remove('active');
+    if(e&&b.textContent.trim()===e.etype) b.classList.add('active');
+  });
+  document.getElementById('exercise-modal').classList.add('open');
+}
+function closeExerciseModal(){document.getElementById('exercise-modal').classList.remove('open');}
+
+async function saveExercise() {
+  if(!curExType) return alert('운동 종류를 선택해주세요.');
+  const duration_min=parseInt(document.getElementById('ex-duration').value)||null;
+  const distance_km=parseFloat(document.getElementById('ex-distance').value)||null;
+  const calories=parseInt(document.getElementById('ex-calories').value)||null;
+  const note=document.getElementById('ex-note').value.trim()||null;
+  const date=document.getElementById('ex-date').value||localDateStr(healthDate);
+  const editId=document.getElementById('ex-edit-id').value;
+  const payload={etype:curExType,duration_min,distance_km,calories,note,date};
+  if(editId){
+    await sbFetch(`df_exercise?id=eq.${editId}`,'PATCH',payload);
+    const i=exerciseRecords.findIndex(e=>e.id===editId);
+    if(i>=0) exerciseRecords[i]={...exerciseRecords[i],...payload};
+  } else {
+    const res=await sbFetch('df_exercise','POST',payload);
+    if(Array.isArray(res)&&res[0]) exerciseRecords.push(res[0]);
+  }
+  closeExerciseModal();
+  renderHealth();
+}
+
+async function deleteExercise(id){
+  if(!confirm('삭제할까요?')) return;
+  await sbFetch(`df_exercise?id=eq.${id}`,'DELETE');
+  exerciseRecords=exerciseRecords.filter(e=>e.id!==id);
+  renderHealth();
+}
+
+function changeHealthDate(offset){
+  healthDate=new Date(healthDate.getFullYear(),healthDate.getMonth(),healthDate.getDate()+offset);
+  renderHealth();
+}
+function goHealthToday(){healthDate=new Date();renderHealth();}
+
 // ══════════════════════════════════════════════
 //  NAV
 // ══════════════════════════════════════════════
@@ -1684,6 +2232,7 @@ function showView(name,btn) {
   if(name==='stats'){renderStats();}
   if(name==='manage'){renderManage();}
   if(name==='money'){renderMoney();}
+  if(name==='health'){renderHealth();}
 }
 
 // ══════════════════════════════════════════════
@@ -1722,6 +2271,55 @@ window.addEventListener('load',()=>{ if(checkConfig()) init(); });
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeMoneyModal()">취소</button>
       <button class="btn btn-primary" onclick="saveMoney()">저장 🎀</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCISE MODAL -->
+<div class="modal-overlay" id="exercise-modal">
+  <div class="modal">
+    <h3 id="exercise-modal-title">운동 기록 🏃</h3>
+    <div class="form-group">
+      <label class="form-label">운동 종류</label>
+      <div class="type-btns" id="ex-type-btns" style="flex-wrap:wrap">
+        <button class="type-btn" onclick="setExType('🎾 테니스',this)">🎾 테니스</button>
+        <button class="type-btn" onclick="setExType('🏃 러닝',this)">🏃 러닝</button>
+        <button class="type-btn" onclick="setExType('🏋️ 웨이트',this)">🏋️ 웨이트</button>
+        <button class="type-btn" onclick="setExType('🚴 사이클',this)">🚴 사이클</button>
+        <button class="type-btn" onclick="setExType('🧘 요가',this)">🧘 요가</button>
+        <button class="type-btn" onclick="setExType('🏊 수영',this)">🏊 수영</button>
+        <button class="type-btn" onclick="setExType('🚶 워킹',this)">🚶 워킹</button>
+        <button class="type-btn" onclick="setExType('기타',this)">기타</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">시간 (분)</label>
+        <input class="form-input" id="ex-duration" type="number" placeholder="90"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">거리 (km, 선택)</label>
+        <input class="form-input" id="ex-distance" type="number" step="0.1" placeholder="5.2"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">칼로리 (선택)</label>
+        <input class="form-input" id="ex-calories" type="number" placeholder="350"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">날짜</label>
+        <input class="form-input" id="ex-date" type="date"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">메모 (선택)</label>
+      <input class="form-input" id="ex-note" placeholder="오늘 컨디션은?"/>
+    </div>
+    <input type="hidden" id="ex-edit-id"/>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeExerciseModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveExercise()">저장 🎀</button>
     </div>
   </div>
 </div>
