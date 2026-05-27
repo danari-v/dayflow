@@ -803,66 +803,68 @@ document.head.appendChild(appleLink);
     <!-- ── ANALYTICS ── -->
     <div class="view" id="view-stats">
 
-      <!-- Period selector -->
+      <!-- Month nav -->
       <div class="stats-header-row">
         <div class="stats-title">Analytics</div>
-        <div class="period-tabs">
-          <button class="period-tab active" onclick="setPeriod('week',this)">주간</button>
-          <button class="period-tab" onclick="setPeriod('month',this)">월간</button>
-          <button class="period-tab" onclick="setPeriod('year',this)">연간</button>
+        <div class="money-nav">
+          <button class="cal-nav-btn" onclick="changeAnalyticsMonth(-1)">‹</button>
+          <span style="font-family:'Gaegu',cursive;font-size:17px;font-weight:700;min-width:100px;text-align:center" id="an-month-label"></span>
+          <button class="cal-nav-btn" onclick="changeAnalyticsMonth(1)">›</button>
         </div>
       </div>
 
-      <!-- ① 투두 완료율 -->
-      <div class="analytics-section-title">✅ 할 일 완료율</div>
-      <div class="stats-cards">
-        <div class="stat-card"><div class="stat-num" id="stat-total">–</div><div class="stat-lbl">총 할 일</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-done">–</div><div class="stat-lbl">완료</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-rate">–</div><div class="stat-lbl">완료율</div></div>
-      </div>
-      <div class="chart-card" style="margin-bottom:14px">
-        <div class="chart-title" id="chart-title">📊 일별 완료율</div>
-        <div class="bar-chart" id="bar-chart"></div>
-      </div>
-
-      <!-- ② 지출 패턴 -->
-      <div class="analytics-section-title">💰 지출 패턴</div>
+      <!-- ① 재정 -->
+      <div class="analytics-section-title">💰 Financial</div>
       <div class="stats-cards" style="margin-bottom:10px">
         <div class="stat-card"><div class="stat-num" id="an-expense-total">–</div><div class="stat-lbl">총 지출</div></div>
-        <div class="stat-card"><div class="stat-num" id="an-expense-avg">–</div><div class="stat-lbl">일평균</div></div>
-        <div class="stat-card"><div class="stat-num" id="an-expense-top">–</div><div class="stat-lbl">최다 카테고리</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-expense-prev">–</div><div class="stat-lbl">전월 대비</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-income-total">–</div><div class="stat-lbl">총 수입</div></div>
       </div>
-      <div class="chart-card" style="margin-bottom:14px">
+      <div class="chart-card" style="margin-bottom:6px">
         <div class="chart-title">💸 카테고리별 지출</div>
         <div id="an-expense-cat-chart"></div>
       </div>
+      <div class="chart-card" style="margin-bottom:14px">
+        <div class="chart-title">📋 지출 상세</div>
+        <div id="an-expense-detail"></div>
+      </div>
 
-      <!-- ③ 운동 패턴 -->
-      <div class="analytics-section-title">🏃 운동 패턴</div>
+      <!-- ② 운동 -->
+      <div class="analytics-section-title">🏃 Exercise</div>
       <div class="stats-cards" style="margin-bottom:10px">
         <div class="stat-card"><div class="stat-num" id="an-ex-count">–</div><div class="stat-lbl">운동 횟수</div></div>
-        <div class="stat-card"><div class="stat-num" id="an-ex-time">–</div><div class="stat-lbl">총 운동 시간</div></div>
-        <div class="stat-card"><div class="stat-num" id="an-ex-cal">–</div><div class="stat-lbl">총 칼로리</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-ex-time">–</div><div class="stat-lbl">총 시간</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-ex-cal">–</div><div class="stat-lbl">칼로리</div></div>
+      </div>
+      <div class="stats-cards" style="margin-bottom:10px">
+        <div class="stat-card"><div class="stat-num" id="an-ex-week">–</div><div class="stat-lbl">주간 평균</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-ex-dist">–</div><div class="stat-lbl">총 거리</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-ex-best">–</div><div class="stat-lbl">최다 운동</div></div>
       </div>
       <div class="chart-card" style="margin-bottom:14px">
         <div class="chart-title">🏅 운동 종류별</div>
         <div id="an-ex-type-chart"></div>
       </div>
 
-      <!-- ④ 건강 트렌드 -->
-      <div class="analytics-section-title">⚖️ 몸무게 & 비타민</div>
+      <!-- ③ 건강 -->
+      <div class="analytics-section-title">⚖️ Health</div>
       <div class="stats-cards" style="margin-bottom:10px">
-        <div class="stat-card"><div class="stat-num" id="an-weight-change">–</div><div class="stat-lbl">몸무게 변화</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-weight-start">–</div><div class="stat-lbl">시작 몸무게</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-weight-end">–</div><div class="stat-lbl">현재 몸무게</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-weight-change">–</div><div class="stat-lbl">변화량</div></div>
+      </div>
+      <div class="stats-cards" style="margin-bottom:14px">
         <div class="stat-card"><div class="stat-num" id="an-vitamin-rate">–</div><div class="stat-lbl">비타민 완료율</div></div>
-        <div class="stat-card"><div class="stat-num" id="an-ex-week">–</div><div class="stat-lbl">주간 운동 평균</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-vitamin-days">–</div><div class="stat-lbl">비타민 복용일</div></div>
+        <div class="stat-card"><div class="stat-num" id="an-weight-avg">–</div><div class="stat-lbl">평균 몸무게</div></div>
       </div>
 
-      <!-- ⑤ 종합 인사이트 (AI) -->
-      <div class="analytics-section-title">🐰 종합 인사이트</div>
+      <!-- ④ AI 분석 -->
+      <div class="analytics-section-title">🐰 AI Monthly Report</div>
       <div class="ai-card">
         <div class="ai-card-header">
           <div class="ai-icon">🐰</div>
-          <div class="ai-card-title">AI 종합 분석</div>
+          <div class="ai-card-title">월간 AI 분석</div>
         </div>
         <div id="ai-body" class="ai-body">Analytics 탭을 열면 자동으로 집계돼요!</div>
         <button class="btn btn-secondary" style="width:100%;margin-top:12px;font-size:12px" onclick="runAiAnalysis()">🔄 다시 분석하기</button>
@@ -1189,6 +1191,7 @@ async function init() {
   currentDate = new Date();
   calViewDate = new Date();
   healthDate = new Date();
+  analyticsDate = new Date();
 
   await fetchAll();
   renderCalendar();
@@ -1609,7 +1612,7 @@ function formatDays(days) {
 // ══════════════════════════════════════════════
 //  STATS
 // ══════════════════════════════════════════════
-function renderStats() { calcStats(); renderAnalytics(); runAiAnalysis(); }
+function renderStats() { renderAnalytics(); runAiAnalysis(); }
 
 function setPeriod(p,btn) {
   currentPeriod=p;
@@ -2185,236 +2188,241 @@ function goHealthToday(){healthDate=new Date();renderHealth();}
 
 
 // ══════════════════════════════════════════════
-//  ANALYTICS — 종합 분석
+//  ANALYTICS
 // ══════════════════════════════════════════════
+var analyticsDate = new Date();
+
+function changeAnalyticsMonth(offset) {
+  analyticsDate = new Date(analyticsDate.getFullYear(), analyticsDate.getMonth()+offset, 1);
+  renderAnalytics();
+  runAiAnalysis();
+}
+
 function renderAnalytics() {
-  const now = new Date();
-  let fromDate = new Date(now);
-  if(currentPeriod==='week') fromDate.setDate(now.getDate()-6);
-  else if(currentPeriod==='month') fromDate.setMonth(now.getMonth()-1);
-  else fromDate.setFullYear(now.getFullYear()-1);
-  const fromStr = localDateStr(fromDate);
+  var y = analyticsDate.getFullYear();
+  var m = analyticsDate.getMonth();
+  var months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  var lbl = document.getElementById('an-month-label');
+  if(lbl) lbl.textContent = y+'년 '+months[m];
 
-  // ── 지출 분석 ──
-  const periodMoney = moneyRecords.filter(r=>r.date>=fromStr&&r.mtype==='expense');
-  const totalExpense = periodMoney.reduce((s,r)=>s+Number(r.amount),0);
-  const days = Math.max(1, Math.round((now-fromDate)/(1000*60*60*24)));
-  const avgExpense = Math.round(totalExpense/days);
+  var monthStr = y+'-'+String(m+1).padStart(2,'0');
 
-  // Top category
-  const catMap = {};
-  periodMoney.forEach(r=>{ catMap[r.cat]=(catMap[r.cat]||0)+Number(r.amount); });
-  const topCat = Object.entries(catMap).sort((a,b)=>b[1]-a[1])[0];
-  const allCats = [...EXPENSE_CATS,...INCOME_CATS];
-  const topCatLabel = topCat ? (allCats.find(c=>c.key===topCat[0])?.label||topCat[0]) : '–';
+  // Prev month string
+  var prevDate = new Date(y, m-1, 1);
+  var prevStr = prevDate.getFullYear()+'-'+String(prevDate.getMonth()+1).padStart(2,'0');
 
-  document.getElementById('an-expense-total').textContent = totalExpense>=10000?(totalExpense/10000).toFixed(1)+'만':'₩'+totalExpense.toLocaleString();
-  document.getElementById('an-expense-avg').textContent = avgExpense>=10000?(avgExpense/10000).toFixed(1)+'만':'₩'+avgExpense.toLocaleString();
-  document.getElementById('an-expense-top').textContent = topCatLabel.split(' ').slice(1).join(' ')||'–';
+  var monthRecs = moneyRecords.filter(function(r){ return r.date.startsWith(monthStr); });
+  var prevRecs  = moneyRecords.filter(function(r){ return r.date.startsWith(prevStr); });
 
-  // Expense category donut (reuse logic)
-  const colors=['#F2A7BE','#F5C4A8','#A8D4C8','#A8B8D4','#C8A8D4','#D4C8A8','#E8A8A8','#A8D4A8'];
-  const catTotals = EXPENSE_CATS.map(cat=>({
-    ...cat, amt: periodMoney.filter(r=>r.cat===cat.key).reduce((s,r)=>s+Number(r.amount),0)
-  })).filter(c=>c.amt>0).sort((a,b)=>b.amt-a.amt);
+  // ── 재정 ──
+  var totalExpense = monthRecs.filter(function(r){return r.mtype==='expense';}).reduce(function(s,r){return s+Number(r.amount);},0);
+  var totalIncome  = monthRecs.filter(function(r){return r.mtype==='income';}).reduce(function(s,r){return s+Number(r.amount);},0);
+  var prevExpense  = prevRecs.filter(function(r){return r.mtype==='expense';}).reduce(function(s,r){return s+Number(r.amount);},0);
+  var diff = totalExpense - prevExpense;
+  var diffStr = prevExpense===0 ? '–' : (diff>=0?'+':'')+'₩'+Math.abs(diff).toLocaleString();
 
-  const el = document.getElementById('an-expense-cat-chart');
+  function fmt(n){ return n>=10000 ? (n/10000).toFixed(1)+'만' : '₩'+n.toLocaleString(); }
+
+  document.getElementById('an-expense-total').textContent = fmt(totalExpense);
+  var prevEl = document.getElementById('an-expense-prev');
+  prevEl.textContent = diffStr;
+  prevEl.style.color = diff>0?'var(--pink-dark)':diff<0?'#2E6B4F':'var(--text)';
+  document.getElementById('an-income-total').textContent = fmt(totalIncome);
+
+  // Category donut
+  var expRecs = monthRecs.filter(function(r){return r.mtype==='expense';});
+  var colors = ['#F2A7BE','#F5C4A8','#A8D4C8','#A8B8D4','#C8A8D4','#D4C8A8','#E8A8A8','#A8D4A8','#D4B8A8','#B8C8D4','#D4D4A8','#C8A8C8','#A8C8D4'];
+  var catTotals = EXPENSE_CATS.map(function(cat){
+    return {key:cat.key, label:cat.label, amt: expRecs.filter(function(r){return r.cat===cat.key;}).reduce(function(s,r){return s+Number(r.amount);},0)};
+  }).filter(function(c){return c.amt>0;}).sort(function(a,b){return b.amt-a.amt;});
+
+  var catEl = document.getElementById('an-expense-cat-chart');
   if(!catTotals.length){
-    el.innerHTML='<div style="text-align:center;padding:12px;font-size:12px;color:var(--text-muted)">지출 내역이 없어요 🌸</div>';
+    catEl.innerHTML='<div style="text-align:center;padding:12px;font-size:12px;color:var(--text-muted)">지출 내역이 없어요 🌸</div>';
   } else {
-    const total = catTotals.reduce((s,c)=>s+c.amt,0);
-    const size=110,cx=55,cy=55,r=42,stroke=16,circum=2*Math.PI*r;
-    let offset=0;
-    const segs = catTotals.map((cat,i)=>{
-      const pct=total?cat.amt/total:0;
-      const dash=pct*circum;
-      const seg=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="${stroke}" stroke-dasharray="${dash} ${circum-dash}" stroke-dashoffset="${circum*0.25-offset}"/>`;
+    var total=catTotals.reduce(function(s,c){return s+c.amt;},0);
+    var size=110,cx=55,cy=55,r=42,stroke=16,circum=2*Math.PI*r;
+    var offset=0;
+    var segs=catTotals.map(function(cat,i){
+      var pct=total?cat.amt/total:0, dash=pct*circum;
+      var seg='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+colors[i%colors.length]+'" stroke-width="'+stroke+'" stroke-dasharray="'+dash+' '+(circum-dash)+'" stroke-dashoffset="'+(circum*0.25-offset)+'"/>';
       offset+=dash; return seg;
     }).join('');
-    const totalFmt=total>=10000?(total/10000).toFixed(1)+'만':total.toLocaleString();
-    const legend=catTotals.map((cat,i)=>`<div class="donut-legend-row">
-      <div class="donut-dot" style="background:${colors[i%colors.length]}"></div>
-      <span class="donut-lbl">${cat.label}</span>
-      <span class="donut-pct">${total?Math.round(cat.amt/total*100):0}%</span>
-      <span class="donut-amt-lbl">₩${cat.amt.toLocaleString()}</span>
-    </div>`).join('');
-    el.innerHTML=`<div class="donut-wrap">
-      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="flex-shrink:0">
-        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#EDE0D4" stroke-width="${stroke}"/>
-        ${segs}
-        <text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="9" fill="#7A5C4A" font-weight="700">합계</text>
-        <text x="${cx}" y="${cy+9}" text-anchor="middle" font-size="10" fill="#5C3D2E" font-weight="800">₩${totalFmt}</text>
-      </svg>
-      <div class="donut-legend">${legend}</div>
-    </div>`;
+    var totalFmt=total>=10000?(total/10000).toFixed(1)+'만':total.toLocaleString();
+    var legend=catTotals.map(function(cat,i){
+      return '<div class="donut-legend-row"><div class="donut-dot" style="background:'+colors[i%colors.length]+'"></div>'
+        +'<span class="donut-lbl">'+cat.label+'</span>'
+        +'<span class="donut-pct">'+(total?Math.round(cat.amt/total*100):0)+'%</span>'
+        +'<span class="donut-amt-lbl">₩'+cat.amt.toLocaleString()+'</span></div>';
+    }).join('');
+    catEl.innerHTML='<div class="donut-wrap">'
+      +'<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" style="flex-shrink:0">'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#EDE0D4" stroke-width="'+stroke+'"/>'
+      +segs
+      +'<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" font-size="9" fill="#7A5C4A" font-weight="700">합계</text>'
+      +'<text x="'+cx+'" y="'+(cy+9)+'" text-anchor="middle" font-size="10" fill="#5C3D2E" font-weight="800">₩'+totalFmt+'</text>'
+      +'</svg><div class="donut-legend">'+legend+'</div></div>';
   }
 
-  // ── 운동 분석 ──
-  const periodEx = exerciseRecords.filter(e=>e.date>=fromStr);
-  const totalMin = periodEx.reduce((s,e)=>s+(e.duration_min||0),0);
-  const totalCal = periodEx.reduce((s,e)=>s+(e.calories||0),0);
-  document.getElementById('an-ex-count').textContent = periodEx.length+'회';
-  document.getElementById('an-ex-time').textContent = totalMin>=60?Math.floor(totalMin/60)+'h'+totalMin%60+'m':totalMin+'분';
-  document.getElementById('an-ex-cal').textContent = totalCal?totalCal.toLocaleString()+'kcal':'–';
+  // 지출 상세 목록 (카테고리별 합계)
+  var detailEl = document.getElementById('an-expense-detail');
+  if(!catTotals.length){
+    detailEl.innerHTML='<div style="text-align:center;padding:8px;font-size:12px;color:var(--text-muted)">내역 없음</div>';
+  } else {
+    var total2=catTotals.reduce(function(s,c){return s+c.amt;},0);
+    detailEl.innerHTML=catTotals.map(function(cat,i){
+      var pct=total2?Math.round(cat.amt/total2*100):0;
+      return '<div class="cat-row">'
+        +'<span class="cat-label" style="min-width:90px">'+cat.label+'</span>'
+        +'<div class="cat-bar-wrap"><div class="cat-bar" style="width:'+pct+'%;background:'+colors[i%colors.length]+'"></div></div>'
+        +'<span class="cat-amt">₩'+cat.amt.toLocaleString()+'</span>'
+        +'</div>';
+    }).join('');
+  }
 
-  // Exercise type breakdown
-  const exTypeMap = {};
-  periodEx.forEach(e=>{ exTypeMap[e.etype]=(exTypeMap[e.etype]||0)+1; });
-  const exTypes = Object.entries(exTypeMap).sort((a,b)=>b[1]-a[1]);
-  const exEl = document.getElementById('an-ex-type-chart');
-  const exTotal = periodEx.length;
+  // ── 운동 ──
+  var monthEx = exerciseRecords.filter(function(e){ return e.date.startsWith(monthStr); });
+  var totalMin = monthEx.reduce(function(s,e){return s+(e.duration_min||0);},0);
+  var totalCal = monthEx.reduce(function(s,e){return s+(e.calories||0);},0);
+  var totalDist= monthEx.reduce(function(s,e){return s+(e.distance_km||0);},0);
+  var weeks = Math.max(1, Math.ceil(new Date(y,m+1,0).getDate()/7));
+  var exTypeMap={};
+  monthEx.forEach(function(e){ exTypeMap[e.etype]=(exTypeMap[e.etype]||0)+1; });
+  var topEx=Object.entries(exTypeMap).sort(function(a,b){return b[1]-a[1];})[0];
+
+  document.getElementById('an-ex-count').textContent  = monthEx.length+'회';
+  document.getElementById('an-ex-time').textContent   = totalMin>=60?Math.floor(totalMin/60)+'h'+totalMin%60+'m':totalMin+'분';
+  document.getElementById('an-ex-cal').textContent    = totalCal?totalCal.toLocaleString()+'kcal':'–';
+  document.getElementById('an-ex-week').textContent   = (monthEx.length/weeks).toFixed(1)+'회';
+  document.getElementById('an-ex-dist').textContent   = totalDist?totalDist.toFixed(1)+'km':'–';
+  document.getElementById('an-ex-best').textContent   = topEx?topEx[0].split(' ')[0]:'–';
+
+  var exTypes=Object.entries(exTypeMap).sort(function(a,b){return b[1]-a[1];});
+  var exEl=document.getElementById('an-ex-type-chart');
+  var exTotal=monthEx.length;
   if(!exTypes.length){
     exEl.innerHTML='<div style="text-align:center;padding:12px;font-size:12px;color:var(--text-muted)">운동 기록이 없어요 🌸</div>';
   } else {
-    exEl.innerHTML = exTypes.map((t,i)=>`
-      <div class="cat-row">
-        <span class="cat-label">${t[0]}</span>
-        <div class="cat-bar-wrap">
-          <div class="cat-bar" style="width:${exTotal?Math.round(t[1]/exTotal*100):0}%;background:${colors[i%colors.length]}"></div>
-        </div>
-        <span class="cat-amt">${t[1]}회 (${exTotal?Math.round(t[1]/exTotal*100):0}%)</span>
-      </div>`).join('');
+    exEl.innerHTML=exTypes.map(function(t,i){
+      return '<div class="cat-row">'
+        +'<span class="cat-label">'+t[0]+'</span>'
+        +'<div class="cat-bar-wrap"><div class="cat-bar" style="width:'+(exTotal?Math.round(t[1]/exTotal*100):0)+'%;background:'+colors[i%colors.length]+'"></div></div>'
+        +'<span class="cat-amt">'+t[1]+'회 ('+(exTotal?Math.round(t[1]/exTotal*100):0)+'%)</span>'
+        +'</div>';
+    }).join('');
   }
 
-  // ── 건강 요약 ──
-  const periodWeight = weightRecords.filter(w=>w.date>=fromStr);
-  let weightChange = '–';
-  if(periodWeight.length>=2){
-    const diff = (Number(periodWeight[periodWeight.length-1].weight)-Number(periodWeight[0].weight)).toFixed(1);
-    weightChange = (diff>0?'+':'')+diff+'kg';
-  }
-  document.getElementById('an-weight-change').textContent = weightChange;
-  document.getElementById('an-weight-change').style.color = weightChange.startsWith('-')?'#2E6B4F':weightChange.startsWith('+')?'var(--pink-dark)':'var(--text)';
+  // ── 건강 ──
+  var monthWeight = weightRecords.filter(function(w){ return w.date.startsWith(monthStr); });
+  var wStart = monthWeight.length ? monthWeight[0].weight : '–';
+  var wEnd   = monthWeight.length ? monthWeight[monthWeight.length-1].weight : '–';
+  var wAvg   = monthWeight.length ? (monthWeight.reduce(function(s,w){return s+Number(w.weight);},0)/monthWeight.length).toFixed(1) : '–';
+  var wDiff  = monthWeight.length>=2 ? ((Number(wEnd)-Number(wStart)).toFixed(1)) : '–';
+  var wDiffStr = wDiff==='–'?'–':(wDiff>0?'+':'')+wDiff+'kg';
 
-  const periodVit = vitaminRecords.filter(v=>v.date>=fromStr);
-  const vitRate = days>0?Math.round(periodVit.filter(v=>v.taken).length/days*100):0;
+  document.getElementById('an-weight-start').textContent = wStart!=='–'?wStart+'kg':'–';
+  document.getElementById('an-weight-end').textContent   = wEnd!=='–'?wEnd+'kg':'–';
+  var wChangeEl = document.getElementById('an-weight-change');
+  wChangeEl.textContent = wDiffStr;
+  if(wDiff!=='–') wChangeEl.style.color = wDiff>0?'var(--pink-dark)':wDiff<0?'#2E6B4F':'var(--text)';
+  document.getElementById('an-weight-avg').textContent = wAvg!=='–'?wAvg+'kg':'–';
+
+  var daysInMonth = new Date(y,m+1,0).getDate();
+  var today = new Date();
+  var daysPassed = (y===today.getFullYear()&&m===today.getMonth()) ? today.getDate() : daysInMonth;
+  var vitDone = vitaminRecords.filter(function(v){ return v.date.startsWith(monthStr)&&v.taken; }).length;
+  var vitRate = daysPassed>0 ? Math.round(vitDone/daysPassed*100) : 0;
   document.getElementById('an-vitamin-rate').textContent = vitRate+'%';
-
-  const weeks = Math.max(1, Math.ceil(days/7));
-  document.getElementById('an-ex-week').textContent = (periodEx.length/weeks).toFixed(1)+'회';
+  document.getElementById('an-vitamin-days').textContent = vitDone+'/'+daysPassed+'일';
 }
 
-// ── Extended AI Analysis ──
+
 async function runAiAnalysis() {
-  const el = document.getElementById('ai-body');
+  var el = document.getElementById('ai-body');
   el.innerHTML = '<div style="color:var(--text-muted);font-size:12px">데이터 집계 중... 🌸</div>';
-
-  const now = new Date();
-  let fromDate = new Date(now);
-  if(currentPeriod==='week') fromDate.setDate(now.getDate()-6);
-  else if(currentPeriod==='month') fromDate.setMonth(now.getMonth()-1);
-  else fromDate.setFullYear(now.getFullYear()-1);
-  const fromStr = localDateStr(fromDate);
-  const days = Math.max(1, Math.round((now-fromDate)/(1000*60*60*24)));
-  const dateRange = [];
-  for(let i=0;i<days;i++){const d=new Date(fromDate);d.setDate(fromDate.getDate()+i);dateRange.push(localDateStr(d));}
-
-  // Todo stats
-  const activeTodos = todos.filter(t=>t.type!=='oneoff');
-  const itemStats = [];
-  for(const todo of activeTodos){
-    const vf=todo.valid_from||'2000-01-01', vu=todo.valid_until||'9999-12-31';
-    const expected=dateRange.filter(ds=>{
-      if(ds<vf||ds>vu)return false;
-      if(todo.type==='routine')return true;
-      if(todo.type==='task'){return(todo.repeat_days||[]).includes(new Date(ds+'T12:00:00').getDay());}
-      return false;
-    });
-    if(!expected.length)continue;
-    const done=expected.filter(ds=>logs.some(l=>l.todo_id===todo.id&&l.date===ds)).length;
-    itemStats.push({text:todo.text,rate:Math.round(done/expected.length*100),done,total:expected.length});
-  }
-  itemStats.sort((a,b)=>b.rate-a.rate);
-
-  // Money
-  const periodMoney = moneyRecords.filter(r=>r.date>=fromStr);
-  const totalExpense = periodMoney.filter(r=>r.mtype==='expense').reduce((s,r)=>s+Number(r.amount),0);
-  const totalIncome  = periodMoney.filter(r=>r.mtype==='income').reduce((s,r)=>s+Number(r.amount),0);
-  const catMap = {};
-  periodMoney.filter(r=>r.mtype==='expense').forEach(r=>{ catMap[r.cat]=(catMap[r.cat]||0)+Number(r.amount); });
-  const topCats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,3)
-    .map(([k,v])=>k+'('+String.fromCharCode(8361)+v.toLocaleString()+')').join(', ');
-
-  // Exercise
-  const periodEx = exerciseRecords.filter(e=>e.date>=fromStr);
-  const totalMin = periodEx.reduce((s,e)=>s+(e.duration_min||0),0);
-  const exTypeMap = {};
-  periodEx.forEach(e=>{ exTypeMap[e.etype]=(exTypeMap[e.etype]||0)+1; });
-  const topEx = Object.entries(exTypeMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>k+'('+v+'회)').join(', ');
-
-  // Weight
-  const periodWeight = weightRecords.filter(w=>w.date>=fromStr);
-  const weightLine = periodWeight.length>=2
-    ? '시작 '+periodWeight[0].weight+'kg → 현재 '+periodWeight[periodWeight.length-1].weight+'kg'
-    : '기록 부족';
-
-  // Vitamin
-  const vitDone = vitaminRecords.filter(v=>v.date>=fromStr&&v.taken).length;
-  const vitRate = Math.round(vitDone/days*100);
-
-  // Build prompt as string concatenation (no template literals with newlines)
-  const rateLabel = currentPeriod==='week'?'최근 7일':currentPeriod==='month'?'최근 1개월':'최근 1년';
-  const todoLines = itemStats.map(s=>(s.rate>=80?'✅':s.rate>=50?'⚠️':'🔴')+' '+s.text+' '+s.done+'/'+s.total+'일 ('+s.rate+'%)').join('\n');
-
-  const promptParts = [
-    '다음은 나의 '+rateLabel+' 생활 데이터야:',
+  var y = analyticsDate.getFullYear();
+  var m = analyticsDate.getMonth();
+  var months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  var monthStr = y+'-'+String(m+1).padStart(2,'0');
+  var monthLabel = y+'년 '+months[m];
+  var prevDate = new Date(y,m-1,1);
+  var prevStr = prevDate.getFullYear()+'-'+String(prevDate.getMonth()+1).padStart(2,'0');
+  var monthRecs = moneyRecords.filter(function(r){ return r.date.startsWith(monthStr); });
+  var prevRecs  = moneyRecords.filter(function(r){ return r.date.startsWith(prevStr); });
+  var monthEx   = exerciseRecords.filter(function(e){ return e.date.startsWith(monthStr); });
+  var monthWeight = weightRecords.filter(function(w){ return w.date.startsWith(monthStr); });
+  var totalExpense = monthRecs.filter(function(r){return r.mtype==='expense';}).reduce(function(s,r){return s+Number(r.amount);},0);
+  var totalIncome  = monthRecs.filter(function(r){return r.mtype==='income';}).reduce(function(s,r){return s+Number(r.amount);},0);
+  var prevExpense  = prevRecs.filter(function(r){return r.mtype==='expense';}).reduce(function(s,r){return s+Number(r.amount);},0);
+  var catMap={};
+  monthRecs.filter(function(r){return r.mtype==='expense';}).forEach(function(r){catMap[r.cat]=(catMap[r.cat]||0)+Number(r.amount);});
+  var catLines=Object.entries(catMap).sort(function(a,b){return b[1]-a[1];}).map(function(e){
+    var found=EXPENSE_CATS.find(function(c){return c.key===e[0];});
+    return (found?found.label:e[0])+': ₩'+Number(e[1]).toLocaleString();
+  }).join(', ');
+  var totalMin=monthEx.reduce(function(s,e){return s+(e.duration_min||0);},0);
+  var totalCal=monthEx.reduce(function(s,e){return s+(e.calories||0);},0);
+  var totalDist=monthEx.reduce(function(s,e){return s+(e.distance_km||0);},0);
+  var exTypeMap={};
+  monthEx.forEach(function(e){exTypeMap[e.etype]=(exTypeMap[e.etype]||0)+1;});
+  var exSummary=Object.entries(exTypeMap).sort(function(a,b){return b[1]-a[1];}).map(function(e){return e[0]+'('+e[1]+'회)';}).join(', ');
+  var wStart=monthWeight.length?monthWeight[0].weight:'기록없음';
+  var wEnd=monthWeight.length?monthWeight[monthWeight.length-1].weight:'기록없음';
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var today=new Date();
+  var daysPassed=(y===today.getFullYear()&&m===today.getMonth())?today.getDate():daysInMonth;
+  var vitDone=vitaminRecords.filter(function(v){return v.date.startsWith(monthStr)&&v.taken;}).length;
+  var vitRate=daysPassed>0?Math.round(vitDone/daysPassed*100):0;
+  var diffAmt=totalExpense-prevExpense;
+  var promptParts=[
+    monthLabel+' 월간 생활 데이터 분석을 부탁해.',
     '',
-    '[할 일 완료율]',
-    todoLines||'데이터 없음',
+    '[건강 배경 - 분석 시 반드시 참고]',
+    '현재 Dana는 아래 증상을 추적 중이야. 건강 데이터 분석 시 이 맥락을 반드시 반영해줘:',
+    '- 아침 손 붓기, 양손 손가락 마디 통증/뻣뻣함, 오전~오후 지속 stiffness',
+    '- 종아리 전체 단단함/무거움, 발 아치 통증, 기저 피로감',
+    '- 체중이 계단식으로 증가하는 패턴 (단순 폭식보다 수분저류/염증 가능성 포함)',
+    '- 현재 상태: 초기 염증성 상태 가능성을 추적 중인 단계 (류마티스/갑상선 가능성 배제 못 함)',
+    '- 피검사는 현재 정상, 열감/심한 관절 변형은 없음',
+    '- 일상 활동량: 테니스, 워킹 + 오래 서서 근무 → 자잘한 관절/힘줄 과부하 누적 가능',
+    '- 비타민 복용이 특히 중요한 상태 (염증/회복 지원)',
     '',
     '[재정]',
-    '- 총 지출: '+String.fromCharCode(8361)+totalExpense.toLocaleString()+' / 총 수입: '+String.fromCharCode(8361)+totalIncome.toLocaleString(),
-    '- 주요 지출: '+(topCats||'없음'),
+    '- 이번 달 총 지출: ₩'+totalExpense.toLocaleString(),
+    '- 이번 달 총 수입: ₩'+totalIncome.toLocaleString(),
+    '- 전월 지출: ₩'+prevExpense.toLocaleString()+' (변화: '+(diffAmt>=0?'+':'')+'₩'+Math.abs(diffAmt).toLocaleString()+')',
+    '- 카테고리별 지출: '+(catLines||'없음'),
     '',
     '[운동]',
-    '- 총 '+periodEx.length+'회, '+totalMin+'분',
-    '- 주요 운동: '+(topEx||'없음'),
+    '- 총 '+monthEx.length+'회, '+totalMin+'분'+(totalCal?' / '+totalCal+'kcal':'')+(totalDist?' / '+totalDist.toFixed(1)+'km':''),
+    '- 운동 종류: '+(exSummary||'없음'),
+    '- 주간 평균: '+(monthEx.length/Math.ceil(daysInMonth/7)).toFixed(1)+'회',
     '',
     '[건강]',
-    '- 몸무게: '+weightLine,
-    '- 비타민 완료율: '+vitRate+'%',
+    '- 몸무게: '+wStart+'kg → '+wEnd+'kg',
+    '- 비타민 복용: '+vitDone+'/'+daysPassed+'일 ('+vitRate+'%)',
     '',
-    '이 데이터를 바탕으로:',
-    '1. 잘 되고 있는 부분 칭찬',
-    '2. 개선이 필요한 부분 부드럽게 제안',
-    '3. 생활 패턴에서 발견되는 흥미로운 상관관계나 인사이트',
-    '4. 따뜻한 마무리 한마디',
-    '한국어로 답변해줘.'
+    '위 데이터를 바탕으로 아래 내용을 한국어로 분석해줘:',
+    '1. 재정: 이번 달 지출 패턴, 전월 대비 변화, 주목할 카테고리',
+    '2. 운동: 운동량 vs 회복 밸런스 평가 (현재 몸 상태 맥락 반영), 잘 된 점과 주의할 점',
+    '3. 건강: 몸무게 변화 해석 (수분저류/염증 관점 포함), 비타민 완료율 중요성 강조, 이번 달 증상 패턴에 대한 인사이트',
+    '4. 종합 인사이트: 세 영역을 연결하는 패턴, 몸 회복모드 관점에서의 제안',
+    '5. 따뜻한 마무리 한마디 (Dana가 나름 열심히 하고 있다는 점 인정해주기)'
   ];
-  const prompt = promptParts.join('\n');
-
-  // Preview rows
-  const previewRows = itemStats.slice(0,5).map(s=>{
-    const emoji = s.rate>=80?'✅':s.rate>=50?'⚠️':'🔴';
-    const color = s.rate>=80?'var(--pink-dark)':s.rate>=50?'#C07030':'#C04040';
-    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--brown-pale)">'
-      +'<span>'+emoji+'</span>'
-      +'<span style="flex:1;font-size:12px;font-weight:700">'+s.text+'</span>'
-      +'<span style="font-size:12px;font-weight:800;color:'+color+'">'+s.rate+'%</span>'
-      +'</div>';
-  }).join('');
-
-  el.innerHTML = '<div style="margin-bottom:12px;font-size:12px">'
-    +'<div style="font-weight:800;margin-bottom:6px;color:var(--text-muted)">할 일 완료율 TOP</div>'
-    +(previewRows||'<div style="color:var(--text-muted)">데이터 없음</div>')
-    +'<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--brown-pale)">'
-    +'💰 지출 <strong>'+String.fromCharCode(8361)+totalExpense.toLocaleString()+'</strong> &nbsp; '
-    +'🏃 운동 <strong>'+periodEx.length+'회</strong> &nbsp; '
-    +'💊 비타민 <strong>'+vitRate+'%</strong>'
-    +'</div></div>'
-    +'<p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">📋 복사 후 claude.ai에 붙여넣으면 상세 분석을 받을 수 있어요 🐰</p>';
-
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'btn btn-primary';
-  copyBtn.style.cssText = 'width:100%;font-size:12px';
-  copyBtn.textContent = '📋 AI 종합 분석 데이터 복사하기';
-  copyBtn.onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(prompt);
-      copyBtn.textContent = '✅ 복사됐어요! claude.ai에 붙여넣기 해보세요';
-      copyBtn.style.background = 'var(--routine)';
-      setTimeout(()=>{copyBtn.textContent='📋 AI 종합 분석 데이터 복사하기';copyBtn.style.background='';},3000);
-    } catch(e){ copyBtn.textContent='❌ 복사 실패'; }
+  var prompt=promptParts.join('\n');
+  el.innerHTML='<p style="font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:8px">'
+    +'<strong>'+monthLabel+'</strong> 데이터가 집계됐어요!<br>'
+    +'복사 후 claude.ai에 붙여넣으면 월간 분석을 받을 수 있어요 🐰</p>';
+  var copyBtn=document.createElement('button');
+  copyBtn.className='btn btn-primary';
+  copyBtn.style.cssText='width:100%;font-size:12px';
+  copyBtn.textContent='📋 '+monthLabel+' AI 분석 복사하기';
+  copyBtn.onclick=function(){
+    navigator.clipboard.writeText(prompt).then(function(){
+      copyBtn.textContent='✅ 복사됐어요!';
+      copyBtn.style.background='#2E6B4F';
+      setTimeout(function(){copyBtn.textContent='📋 '+monthLabel+' AI 분석 복사하기';copyBtn.style.background='';},3000);
+    }).catch(function(){copyBtn.textContent='❌ 복사 실패';});
   };
   el.appendChild(copyBtn);
 }
