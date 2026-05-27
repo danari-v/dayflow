@@ -1786,11 +1786,25 @@ function renderMoneyList(recs) {
   if(!recs.length){el.innerHTML='<div class="money-empty">이번 달 내역이 없어요 🌸</div>';return;}
   const sorted=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
   const allCats=[...EXPENSE_CATS,...INCOME_CATS];
-  el.innerHTML=sorted.map(r=>{
-    const cat=allCats.find(c=>c.key===r.cat)||{label:'📦 기타'};
-    const icon=cat.label.split(' ')[0], name=cat.label.split(' ').slice(1).join(' ');
-    return '<div class="money-item"><div class="money-item-cat">'+icon+'</div><div class="money-item-info"><div class="money-item-text">'+r.text+'</div><div class="money-item-sub">'+name+' · '+r.date+'</div></div><span class="money-item-amt '+r.mtype+'">'+(r.mtype==='income'?'+':'-')+'₩'+Number(r.amount).toLocaleString()+'</span><div class="money-item-actions"><button class="act-btn" onclick="openMoneyModal(''+r.id+'')">✎</button><button class="act-btn del" onclick="deleteMoney(''+r.id+'')">✕</button></div></div>';
-  }).join('');
+  const items = sorted.map(function(r) {
+    const cat = allCats.find(function(c){return c.key===r.cat;}) || {label:'📦 기타'};
+    const icon = cat.label.split(' ')[0];
+    const name = cat.label.split(' ').slice(1).join(' ');
+    const sign = r.mtype==='income' ? '+' : '-';
+    const amt = '₩' + Number(r.amount).toLocaleString();
+    const editBtn = '<button class="act-btn" onclick="openMoneyModal(\'' + r.id + \'\')">' + '✎</button>';
+    const delBtn = '<button class="act-btn del" onclick="deleteMoney(\'' + r.id + \'\')">' + '✕</button>';
+    return '<div class="money-item">'
+      + '<div class="money-item-cat">' + icon + '</div>'
+      + '<div class="money-item-info">'
+        + '<div class="money-item-text">' + r.text + '</div>'
+        + '<div class="money-item-sub">' + name + ' · ' + r.date + '</div>'
+      + '</div>'
+      + '<span class="money-item-amt ' + r.mtype + '">' + sign + amt + '</span>'
+      + '<div class="money-item-actions">' + editBtn + delBtn + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = items.join('');
 }
 
 function changeMoneyMonth(offset){
