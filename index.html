@@ -1782,29 +1782,35 @@ function renderMoneyTrend() {
 }
 
 function renderMoneyList(recs) {
-  const el=document.getElementById('money-list');
-  if(!recs.length){el.innerHTML='<div class="money-empty">이번 달 내역이 없어요 🌸</div>';return;}
-  const sorted=[...recs].sort((a,b)=>a.date.localeCompare(b.date));
-  const allCats=[...EXPENSE_CATS,...INCOME_CATS];
-  const items = sorted.map(function(r) {
-    const cat = allCats.find(function(c){return c.key===r.cat;}) || {label:'📦 기타'};
-    const icon = cat.label.split(' ')[0];
-    const name = cat.label.split(' ').slice(1).join(' ');
-    const sign = r.mtype==='income' ? '+' : '-';
-    const amt = '₩' + Number(r.amount).toLocaleString();
-    const editBtn = '<button class="act-btn" onclick="openMoneyModal(\'' + r.id + \'\')">' + '✎</button>';
-    const delBtn = '<button class="act-btn del" onclick="deleteMoney(\'' + r.id + \'\')">' + '✕</button>';
-    return '<div class="money-item">'
-      + '<div class="money-item-cat">' + icon + '</div>'
+  var el = document.getElementById('money-list');
+  if (!recs.length) { el.innerHTML = '<div class="money-empty">이번 달 내역이 없어요 🌸</div>'; return; }
+  var sorted = recs.slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
+  var allCats = EXPENSE_CATS.concat(INCOME_CATS);
+  el.innerHTML = '';
+  sorted.forEach(function(r) {
+    var cat = allCats.find(function(c){ return c.key === r.cat; }) || {label:'📦 기타'};
+    var parts = cat.label.split(' ');
+    var icon = parts[0];
+    var name = parts.slice(1).join(' ');
+    var div = document.createElement('div');
+    div.className = 'money-item';
+    div.innerHTML = '<div class="money-item-cat">' + icon + '</div>'
       + '<div class="money-item-info">'
-        + '<div class="money-item-text">' + r.text + '</div>'
-        + '<div class="money-item-sub">' + name + ' · ' + r.date + '</div>'
+      + '<div class="money-item-text">' + r.text + '</div>'
+      + '<div class="money-item-sub">' + name + ' · ' + r.date + '</div>'
       + '</div>'
-      + '<span class="money-item-amt ' + r.mtype + '">' + sign + amt + '</span>'
-      + '<div class="money-item-actions">' + editBtn + delBtn + '</div>'
+      + '<span class="money-item-amt ' + r.mtype + '">'
+      + (r.mtype === 'income' ? '+' : '-') + '₩' + Number(r.amount).toLocaleString()
+      + '</span>'
+      + '<div class="money-item-actions">'
+      + '<button class="act-btn">✎</button>'
+      + '<button class="act-btn del">✕</button>'
       + '</div>';
+    var btns = div.querySelectorAll('.act-btn');
+    btns[0].addEventListener('click', (function(id){ return function(){ openMoneyModal(id); }; })(r.id));
+    btns[1].addEventListener('click', (function(id){ return function(){ deleteMoney(id); }; })(r.id));
+    el.appendChild(div);
   });
-  el.innerHTML = items.join('');
 }
 
 function changeMoneyMonth(offset){
@@ -1827,7 +1833,15 @@ function selectCat(key,btn){
 
 function renderCatButtons(){
   const cats=moneyType==='expense'?EXPENSE_CATS:INCOME_CATS;
-  document.getElementById('m-cat-btns').innerHTML=cats.map(cat=>'<button class="cat-btn '+(moneyCat===cat.key?'active':'')+'" onclick="selectCat(''+cat.key+'',this)">'+cat.label+'</button>').join('');
+  var el = document.getElementById('m-cat-btns');
+  el.innerHTML = '';
+  cats.forEach(function(cat) {
+    var btn = document.createElement('button');
+    btn.className = 'cat-btn' + (moneyCat===cat.key ? ' active' : '');
+    btn.textContent = cat.label;
+    btn.addEventListener('click', function(){ selectCat(cat.key, btn); });
+    el.appendChild(btn);
+  });
 }
 
 function setMoneyType(t,btn){
