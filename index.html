@@ -626,17 +626,16 @@
     .ex-empty{text-align:center;padding:20px;font-size:12px;color:var(--text-muted);}
 
     /* Exercise calendar */
-    .ex-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+    .ex-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
     .ex-cal-day{
-      aspect-ratio:1;border-radius:50%;display:flex;align-items:center;
-      justify-content:center;font-size:11px;color:var(--text-muted);
-      cursor:default;position:relative;
+      display:flex;flex-direction:column;align-items:center;
+      padding:3px 1px;border-radius:6px;
+      font-size:11px;color:var(--text-muted);cursor:default;
+      min-height:36px;
     }
-    .ex-cal-day.has-ex{color:white;font-weight:700;}
-    .ex-cal-day.running{background:#A8D4C8;}
-    .ex-cal-day.tennis{background:#F5C4A8;}
-    .ex-cal-day.other{background:var(--pink);}
-    .ex-cal-day.today-ex{box-shadow:0 0 0 2px var(--pink-dark);}
+    .ex-cal-day.today-ex{background:var(--pink-light);font-weight:700;color:var(--pink-dark);}
+    .ex-cal-day-num{font-size:11px;line-height:1.3;}
+    .ex-cal-emojis{display:flex;gap:1px;flex-wrap:wrap;justify-content:center;font-size:12px;line-height:1;}
     .ex-cal-header{text-align:center;font-size:10px;font-weight:700;color:var(--text-muted);padding:2px 0;}
 
     /* Analytics sections */
@@ -1030,11 +1029,7 @@ document.head.appendChild(appleLink);
           </div>
         </div>
         <div class="ex-cal-grid" id="ex-cal-grid"></div>
-        <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--text-muted)">
-          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--pink);margin-right:3px"></span>운동함</span>
-          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#A8D4C8;margin-right:3px"></span>러닝</span>
-          <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#F5C4A8;margin-right:3px"></span>테니스</span>
-        </div>
+
       </div>
     </div>
 
@@ -1678,25 +1673,26 @@ let moneyCat = '';
 let moneyChartType = 'expense';
 
 const EXPENSE_CATS = [
-  {key:'food',    label:'🍱 식비'},
-  {key:'cafe',    label:'☕ 카페'},
-  {key:'trans',   label:'🚌 교통'},
-  {key:'shop',    label:'🛍 쇼핑'},
-  {key:'health',  label:'💊 건강'},
-  {key:'sport',   label:'🎾 스포츠'},
-  {key:'beauty',  label:'💄 뷰티'},
-  {key:'hobby',   label:'🎨 취미'},
-  {key:'house',   label:'🏠 주거'},
-  {key:'edu',     label:'📚 교육'},
-  {key:'sub',     label:'📱 구독'},
-  {key:'etc',     label:'📦 기타'},
+  {key:'savings',   label:'🏦 Savings'},
+  {key:'loan',      label:'💸 Loan Int.'},
+  {key:'tennis',    label:'🎾 Tennis'},
+  {key:'mgmt',      label:'🏢 Mgmt Fee'},
+  {key:'insurance', label:'🛡 Insurance'},
+  {key:'food',      label:'🍱 Food'},
+  {key:'sub',       label:'📱 Sub'},
+  {key:'mobile',    label:'📶 Mobile/Net'},
+  {key:'trans',     label:'🚌 Transport'},
+  {key:'daily',     label:'🧴 Daily Ess.'},
+  {key:'care',      label:'💊 Care/Med'},
+  {key:'social',    label:'🎁 Gifts/Soc'},
+  {key:'cafe',      label:'☕ Cafe/Snack'},
 ];
 const INCOME_CATS = [
-  {key:'salary',  label:'💼 급여'},
-  {key:'extra',   label:'💰 부수입'},
-  {key:'gift',    label:'🎁 선물'},
-  {key:'refund',  label:'↩️ 환급'},
-  {key:'etc',     label:'📦 기타'},
+  {key:'salary',  label:'💼 Salary'},
+  {key:'extra',   label:'💰 Extra Inc.'},
+  {key:'gift',    label:'🎁 Gift'},
+  {key:'refund',  label:'↩️ Refund'},
+  {key:'etc',     label:'📦 Other'},
 ];
 
 async function fetchMoney() {
@@ -2052,27 +2048,32 @@ function setWeightPeriod(p,btn) {
 }
 
 function renderExCal() {
-  const y=exCalDate.getFullYear(), m=exCalDate.getMonth();
-  const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
-  document.getElementById('ex-cal-label').textContent=`${y}년 ${months[m]}`;
-  const firstDay=new Date(y,m,1).getDay();
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  const todayS=realToday();
-  const weekDays=['일','월','화','수','목','금','토'];
-  let html=weekDays.map(d=>`<div class="ex-cal-header">${d}</div>`).join('');
-  for(let i=0;i<firstDay;i++) html+=`<div class="ex-cal-day"></div>`;
-  for(let d=1;d<=daysInMonth;d++){
-    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const exArr=exerciseRecords.filter(e=>e.date===ds);
-    const isToday=ds===todayS;
-    let cls='ex-cal-day';
+  var y=exCalDate.getFullYear(), m=exCalDate.getMonth();
+  var months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('ex-cal-label').textContent=y+'년 '+months[m];
+  var firstDay=new Date(y,m,1).getDay();
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var todayS=realToday();
+  var weekDays=['일','월','화','수','목','금','토'];
+  var html=weekDays.map(function(d){return '<div class="ex-cal-header">'+d+'</div>';}).join('');
+  for(var i=0;i<firstDay;i++) html+='<div class="ex-cal-day"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var exArr=exerciseRecords.filter(function(e){return e.date===ds;});
+    var isToday=ds===todayS;
+    var cls='ex-cal-day'+(isToday?' today-ex':'');
+    var emojis='';
     if(exArr.length){
-      const hasRun=exArr.some(e=>e.etype.includes('러닝'));
-      const hasTennis=exArr.some(e=>e.etype.includes('테니스'));
-      cls+=' has-ex '+(hasRun?'running':hasTennis?'tennis':'other');
+      var shown={};
+      exArr.forEach(function(e){
+        var emoji = e.etype.split(' ')[0];
+        if(!shown[emoji]){ shown[emoji]=true; emojis+=emoji; }
+      });
     }
-    if(isToday) cls+=' today-ex';
-    html+=`<div class="${cls}" title="${exArr.map(e=>e.etype).join(', ')}">${d}</div>`;
+    html+='<div class="'+cls+'">'
+      +'<div class="ex-cal-day-num">'+d+'</div>'
+      +(emojis?'<div class="ex-cal-emojis">'+emojis+'</div>':'')
+      +'</div>';
   }
   document.getElementById('ex-cal-grid').innerHTML=html;
 }
