@@ -477,17 +477,7 @@
     .etype-btn.imp.active{background:#FEF0E8;border-color:#E8956A;color:#C45A2A;}
     .etype-btn.del.active{background:#F5F5E8;border-color:#B8B87A;color:#7A7A2A;}
 
-    /* FAB */
-    .fab{
-      position:fixed;bottom:24px;right:24px;width:52px;height:52px;
-      border-radius:50%;background:var(--pink);color:white;border:none;
-      font-size:24px;cursor:pointer;
-      box-shadow:0 4px 16px rgba(242,167,190,0.5);
-      display:flex;align-items:center;justify-content:center;
-      transition:all 0.2s;z-index:200;
-    }
-    .fab:hover{transform:scale(1.08);background:var(--pink-dark);}
-    .fab:active{transform:scale(0.95);}
+
 
     /* WASHI TAPE DECO */
     .washi{
@@ -900,7 +890,7 @@ document.head.appendChild(appleLink);
 
       <!-- Month nav -->
       <div class="money-header-row">
-        <div class="money-nav">
+        <div style="display:flex;align-items:center;gap:8px">
           <button class="cal-nav-btn" onclick="changeMoneyMonth(-1)">‹</button>
           <span class="money-month-label" id="money-month-label"></span>
           <button class="cal-nav-btn" onclick="changeMoneyMonth(1)">›</button>
@@ -1052,7 +1042,6 @@ document.head.appendChild(appleLink);
 </div>
 
 <!-- FAB -->
-<button class="fab" id="fab" onclick="openTodoModal()" style="display:none">+</button>
 
 <!-- TODO MODAL -->
 <div class="modal-overlay" id="todo-modal">
@@ -1146,14 +1135,12 @@ function saveConfig() {
   SUPABASE_URL = url; SUPABASE_KEY = key;
   document.getElementById('config-overlay').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
-  document.getElementById('fab').style.display = 'flex';
   init();
 }
 function checkConfig() {
   if (SUPABASE_URL && SUPABASE_KEY) {
     document.getElementById('config-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-    document.getElementById('fab').style.display = 'flex';
     return true;
   }
   return false;
@@ -1181,7 +1168,7 @@ async function sbFetch(path, method='GET', body=null, params='') {
 //  STATE
 // ══════════════════════════════════════════════
 let currentDate = new Date();
-let calViewDate = new Date();
+let calViewDate = new Date(); // synced on init
 let todos = [];
 let logs = [];
 let events = [];
@@ -1202,6 +1189,11 @@ async function init() {
   // Set logo icon
   const logoImg = document.getElementById('logo-img');
   if (logoImg && iconB64) logoImg.src = 'data:image/png;base64,' + iconB64;
+
+  // Reset dates to today on every load
+  currentDate = new Date();
+  calViewDate = new Date();
+  healthDate = new Date();
 
   await fetchAll();
   renderCalendar();
@@ -1276,7 +1268,8 @@ function renderCalendar() {
     let labels = '';
     if (holiday) labels += `<div class="cal-ev-label holiday">${holiday}</div>`;
     dayEvents.slice(0,2).forEach(e => {
-      labels += `<div class="cal-ev-label ${e.etype||''}">${e.time?e.time.slice(0,5)+' ':''}${e.text}</div>`;
+      const etypeIcon = e.etype==='important'?'🎀 ':e.etype==='delayed'?'📦 ':'';
+      labels += '<div class="cal-ev-label '+(e.etype||'')+'">'+etypeIcon+(e.time?e.time.slice(0,5)+' ':'')+e.text+'</div>';
     });
     if (dayEvents.length > 2) labels += `<div class="cal-ev-label" style="opacity:.6">+${dayEvents.length-2}개</div>`;
 
@@ -1402,7 +1395,9 @@ function isDone(todoId) { return logs.some(l=>l.todo_id===todoId&&l.date===today
 function renderToday() {
   updateTodayChip();
   const items = getTodayTodos();
-  renderTimeline(items.filter(t=>t.time).sort((a,b)=>a.time.localeCompare(b.time)));
+  const withTime = items.filter(t=>t.time).sort((a,b)=>a.time.localeCompare(b.time));
+  const noTime = items.filter(t=>!t.time);
+  renderTimeline(withTime, noTime);
   updateProgress(items);
   document.getElementById('todo-count-badge').textContent = items.length+'개';
 }
@@ -1434,17 +1429,28 @@ function todoCard(t, done) {
   </div>`;
 }
 
-function renderTimeline(items) {
+function renderTimeline(withTime, noTime) {
   const el = document.getElementById('timeline-body');
-  if(!items.length){ el.innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-muted)">시간 지정된 항목이 없어요 🌸</div>'; return; }
-  el.innerHTML = items.map(t=>{
-    const done=isDone(t.id);
-    return `<div class="tl-slot">
-      <div class="tl-time">${t.time.slice(0,5)}</div>
-      <div class="tl-line"><div class="tl-dot ${done?'has':''}"></div><div class="tl-connector"></div></div>
-      <div class="tl-items">${todoCard(t,done)}</div>
-    </div>`;
-  }).join('');
+  let html = '';
+  if(withTime.length) {
+    html += withTime.map(t=>{
+      const done=isDone(t.id);
+      return '<div class="tl-slot">'
+        +'<div class="tl-time">'+t.time.slice(0,5)+'</div>'
+        +'<div class="tl-line"><div class="tl-dot '+(done?'has':'')+'"></div><div class="tl-connector"></div></div>'
+        +'<div class="tl-items">'+todoCard(t,done)+'</div>'
+        +'</div>';
+    }).join('');
+  }
+  if(noTime && noTime.length) {
+    if(withTime.length) html += '<div style="padding:6px 16px 2px;font-size:11px;font-weight:700;color:var(--text-muted);border-top:1px dashed var(--brown-pale);margin-top:4px">⏳ 시간 미정</div>';
+    html += noTime.map(t=>{
+      const done=isDone(t.id);
+      return '<div style="padding:4px 12px">'+todoCard(t,done)+'</div>';
+    }).join('');
+  }
+  if(!html) html = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-muted)">오늘 할 일이 없어요 🌸</div>';
+  el.innerHTML = html;
 }
 
 let timelineOpen = false;
