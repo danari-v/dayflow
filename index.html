@@ -712,7 +712,6 @@ document.head.appendChild(appleLink);
       <button class="nav-tab active" onclick="showView('home',this)">Scheduler</button>
       <button class="nav-tab" onclick="showView('money',this)">Financial</button>
       <button class="nav-tab" onclick="showView('health',this)">Health</button>
-      <button class="nav-tab" onclick="showView('manage',this)">Management</button>
       <button class="nav-tab" onclick="showView('stats',this)">Analytics</button>
     </div>
   </header>
@@ -755,7 +754,10 @@ document.head.appendChild(appleLink);
           <div class="timeline-card" style="margin-top:0">
             <div class="timeline-header" style="cursor:default">
               <span class="timeline-title">⏱ 타임라인</span>
-              <span class="todo-count-badge" id="todo-count-badge">0개</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="todo-count-badge" id="todo-count-badge">0개</span>
+                <button class="manage-add-btn" style="padding:4px 10px;font-size:11px" onclick="openTodoModal()">+ 추가</button>
+              </div>
             </div>
             <div class="timeline-body open" id="timeline-body"></div>
           </div>
@@ -763,24 +765,6 @@ document.head.appendChild(appleLink);
 
         <!-- RIGHT: side panel -->
         <div class="side-panel">
-          <!-- Progress ring -->
-          <div class="progress-card">
-            <div class="progress-title">🌸 오늘 진행률</div>
-            <div class="progress-ring-wrap">
-              <svg class="ring-svg" viewBox="0 0 36 36">
-                <circle class="ring-bg" cx="18" cy="18" r="14"/>
-                <circle class="ring-fill" id="ring-fill" cx="18" cy="18" r="14"
-                  stroke-dasharray="88" stroke-dashoffset="88"/>
-                <text class="ring-text" x="18" y="22" text-anchor="middle" id="ring-pct">0%</text>
-              </svg>
-              <div class="progress-stats">
-                <div class="progress-stat" id="prog-stat1">완료 <strong>0</strong>개</div>
-                <div class="progress-stat" id="prog-stat2">남은 할 일 <strong>0</strong>개</div>
-                <div class="progress-stat" id="prog-stat3">전체 <strong>0</strong>개</div>
-              </div>
-            </div>
-          </div>
-
           <!-- Quick add -->
           <div class="quickadd-card">
             <div class="quickadd-title">✏️ 빠른 추가</div>
@@ -824,9 +808,13 @@ document.head.appendChild(appleLink);
         <div class="chart-title">💸 카테고리별 지출</div>
         <div id="an-expense-cat-chart"></div>
       </div>
-      <div class="chart-card" style="margin-bottom:14px">
+      <div class="chart-card" style="margin-bottom:6px">
         <div class="chart-title">📋 지출 상세</div>
         <div id="an-expense-detail"></div>
+      </div>
+      <div class="chart-card" style="margin-bottom:14px">
+        <div class="chart-title">📈 월별 지출 추이 (2026)</div>
+        <div id="an-money-trend"></div>
       </div>
 
       <!-- ② 운동 -->
@@ -871,126 +859,61 @@ document.head.appendChild(appleLink);
       </div>
     </div>
 
-    <!-- ── MANAGE ── -->
-    <div class="view" id="view-manage">
-      <div class="manage-section">
-        <div class="manage-section-title">🌸 데일리 항목</div>
-        <div class="manage-list" id="manage-routines"></div>
-      </div>
-      <div class="manage-section">
-        <div class="manage-section-title">🎀 스케쥴 항목</div>
-        <div class="manage-list" id="manage-tasks"></div>
-      </div>
-      <div style="text-align:right;padding-top:4px">
-        <button class="manage-add-btn" onclick="openTodoModal()">+ 새 항목 추가</button>
-      </div>
-    </div>
-
-    <!-- ── MONEY ── -->
-    <div class="view" id="view-money">
-
-      <!-- Month nav -->
-      <div class="money-header-row">
-        <div style="display:flex;align-items:center;gap:8px">
-          <button class="cal-nav-btn" onclick="changeMoneyMonth(-1)">‹</button>
-          <span class="money-month-label" id="money-month-label"></span>
-          <button class="cal-nav-btn" onclick="changeMoneyMonth(1)">›</button>
-        </div>
-        <button class="manage-add-btn" onclick="openMoneyModal()">+ 내역 추가</button>
-      </div>
-
-      <!-- Summary cards -->
-      <div class="money-summary">
-        <div class="money-sum-card income">
-          <div class="money-sum-icon">📈</div>
-          <div class="money-sum-label">이번 달 수입</div>
-          <div class="money-sum-amt" id="sum-income">₩0</div>
-        </div>
-        <div class="money-sum-card expense">
-          <div class="money-sum-icon">📉</div>
-          <div class="money-sum-label">이번 달 지출</div>
-          <div class="money-sum-amt" id="sum-expense">₩0</div>
-        </div>
-        <div class="money-sum-card balance">
-          <div class="money-sum-icon">💰</div>
-          <div class="money-sum-label">잔액</div>
-          <div class="money-sum-amt" id="sum-balance">₩0</div>
-        </div>
-      </div>
-
-      <!-- Category chart -->
-      <div class="chart-card" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <div class="chart-title" style="margin-bottom:0">📊 카테고리별 지출</div>
-          <div class="period-tabs" style="margin-bottom:0">
-            <button class="period-tab active" id="mcat-expense-btn" onclick="setMoneyChartType('expense',this)">지출</button>
-            <button class="period-tab" id="mcat-income-btn" onclick="setMoneyChartType('income',this)">수입</button>
-          </div>
-        </div>
-        <div id="cat-chart"></div>
-      </div>
-
-      <!-- Monthly trend chart -->
-      <div class="chart-card" style="margin-bottom:14px">
-        <div class="chart-title">📈 월별 추이</div>
-        <div class="bar-chart" id="money-trend-chart"></div>
-      </div>
-
-      <!-- Transaction list -->
-      <div class="chart-card">
-        <div class="chart-title">🧾 내역</div>
-        <div id="money-list"></div>
-      </div>
-    </div>
-
-
     <!-- ── HEALTH ── -->
     <div class="view" id="view-health">
 
-      <!-- 날짜 네비 -->
-      <div class="money-header-row">
+      <!-- 운동 캘린더 (맨 위) -->
+      <div class="chart-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="chart-title" style="margin-bottom:0">📅 운동 달력</div>
+          <div class="money-nav" style="gap:8px">
+            <button class="cal-nav-btn" onclick="changeExCal(-1)">‹</button>
+            <span style="font-size:13px;font-weight:700" id="ex-cal-label"></span>
+            <button class="cal-nav-btn" onclick="changeExCal(1)">›</button>
+          </div>
+        </div>
+        <div class="ex-cal-grid" id="ex-cal-grid"></div>
+      </div>
+
+      <!-- 날짜 네비 + 오늘 기록 한 줄 -->
+      <div class="money-header-row" style="margin-bottom:12px">
         <div class="money-nav">
           <button class="cal-nav-btn" onclick="changeHealthDate(-1)">‹</button>
-          <span class="money-month-label" id="health-date-label"></span>
+          <span class="money-month-label" id="health-date-label" style="font-size:15px;min-width:90px"></span>
           <button class="cal-nav-btn" onclick="changeHealthDate(1)">›</button>
         </div>
         <button class="manage-add-btn" onclick="goHealthToday()">오늘</button>
       </div>
 
-      <!-- 오늘 빠른 기록 -->
-      <div class="health-quick-row">
+      <!-- 오늘 기록 3개 한 줄 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
 
         <!-- 몸무게 -->
-        <div class="health-quick-card">
-          <div class="health-quick-title">⚖️ 몸무게</div>
-          <div class="health-weight-row">
-            <input class="form-input" id="hq-weight" type="number" step="0.1" placeholder="kg" style="font-size:18px;font-weight:800;text-align:center"/>
-            <button class="add-btn" style="margin-top:6px;padding:7px" onclick="saveWeight()">저장</button>
-          </div>
-          <div id="hq-weight-today" style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px"></div>
+        <div class="health-quick-card" style="padding:10px">
+          <div class="health-quick-title" style="font-size:13px">⚖️ 몸무게</div>
+          <input class="form-input" id="hq-weight" type="number" step="0.1" placeholder="kg"
+            style="font-size:15px;font-weight:800;text-align:center;padding:6px;margin-top:4px"/>
+          <button class="add-btn" style="margin-top:5px;padding:5px;font-size:11px" onclick="saveWeight()">저장</button>
+          <div id="hq-weight-today" style="font-size:10px;color:var(--text-muted);text-align:center;margin-top:3px"></div>
+        </div>
+
+        <!-- 운동 -->
+        <div class="health-quick-card" style="padding:10px">
+          <div class="health-quick-title" style="font-size:13px">🏃 운동</div>
+          <div id="exercise-today-list" style="margin-top:4px"></div>
+          <button class="add-btn" style="margin-top:5px;padding:5px;font-size:11px" onclick="openExerciseModal()">+ 추가</button>
         </div>
 
         <!-- 비타민 -->
-        <div class="health-quick-card">
-          <div class="health-quick-title">💊 비타민</div>
-          <div style="text-align:center;padding:8px 0">
-            <div id="vitamin-stamp" class="vitamin-stamp" onclick="toggleVitamin()">💊</div>
-            <div id="vitamin-label" style="font-size:11px;color:var(--text-muted);margin-top:6px">탭해서 체크!</div>
-          </div>
+        <div class="health-quick-card" style="padding:10px;text-align:center">
+          <div class="health-quick-title" style="font-size:13px">💊 비타민</div>
+          <div id="vitamin-stamp" class="vitamin-stamp" onclick="toggleVitamin()" style="font-size:28px;margin-top:4px">💊</div>
+          <div id="vitamin-label" style="font-size:10px;color:var(--text-muted);margin-top:4px">탭해서 체크!</div>
         </div>
-      </div>
-
-      <!-- 운동 기록 -->
-      <div class="chart-card" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div class="chart-title" style="margin-bottom:0">🏃 오늘의 운동</div>
-          <button class="manage-add-btn" onclick="openExerciseModal()">+ 추가</button>
-        </div>
-        <div id="exercise-today-list"></div>
       </div>
 
       <!-- 이번 달 요약 -->
-      <div class="health-summary-row">
+      <div class="health-summary-row" style="margin-bottom:14px">
         <div class="health-sum-card">
           <div class="health-sum-icon">⚖️</div>
           <div class="health-sum-val" id="hs-weight">–</div>
@@ -1009,7 +932,7 @@ document.head.appendChild(appleLink);
       </div>
 
       <!-- 몸무게 그래프 -->
-      <div class="chart-card" style="margin-bottom:14px">
+      <div class="chart-card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div class="chart-title" style="margin-bottom:0">⚖️ 몸무게 추이</div>
           <div class="period-tabs" style="margin-bottom:0">
@@ -1018,20 +941,6 @@ document.head.appendChild(appleLink);
           </div>
         </div>
         <div id="weight-chart"></div>
-      </div>
-
-      <!-- 운동 캘린더 -->
-      <div class="chart-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div class="chart-title" style="margin-bottom:0">📅 운동 달력</div>
-          <div class="money-nav" style="gap:8px">
-            <button class="cal-nav-btn" onclick="changeExCal(-1)">‹</button>
-            <span style="font-size:13px;font-weight:700" id="ex-cal-label"></span>
-            <button class="cal-nav-btn" onclick="changeExCal(1)">›</button>
-          </div>
-        </div>
-        <div class="ex-cal-grid" id="ex-cal-grid"></div>
-
       </div>
     </div>
 
@@ -1720,8 +1629,6 @@ function renderMoney() {
   const balEl = document.getElementById('sum-balance');
   balEl.textContent = (balance>=0?'+':'')+'₩'+balance.toLocaleString();
   balEl.style.color = balance>=0 ? '#2E6B4F' : 'var(--pink-dark)';
-  renderCatChart(monthRecs);
-  renderMoneyTrend();
   renderMoneyList(monthRecs);
 }
 
@@ -2334,6 +2241,36 @@ function renderAnalytics() {
   var vitRate = daysPassed>0 ? Math.round(vitDone/daysPassed*100) : 0;
   document.getElementById('an-vitamin-rate').textContent = vitRate+'%';
   document.getElementById('an-vitamin-days').textContent = vitDone+'/'+daysPassed+'일';
+
+  // ── 재정 월별 추이 (2026) ──
+  var trendMonths=[];
+  for(var mi=0;mi<12;mi++) trendMonths.push({label:(mi+1)+'월',str:'2026-'+String(mi+1).padStart(2,'0')});
+  var trendData=trendMonths.map(function(mo){
+    var recs=moneyRecords.filter(function(r){return r.date.startsWith(mo.str);});
+    return {label:mo.label,
+      income:recs.filter(function(r){return r.mtype==='income';}).reduce(function(s,r){return s+Number(r.amount);},0),
+      expense:recs.filter(function(r){return r.mtype==='expense';}).reduce(function(s,r){return s+Number(r.amount);},0)};
+  });
+  var maxVal2=Math.max.apply(null,trendData.map(function(d){return Math.max(d.income,d.expense);}));
+  if(maxVal2===0) maxVal2=1;
+  var W2=340,H2=120,pL=8,pR=8,pT=14,pB=24,cW=W2-pL-pR,cH=H2-pT-pB,n2=trendData.length;
+  var xP=function(i){return pL+(i/(n2-1))*cW;};
+  var yP=function(v){return pT+cH-(v/maxVal2)*cH;};
+  var mkLine2=function(key,color){
+    var pts=trendData.map(function(d,i){return xP(i).toFixed(1)+','+yP(d[key]).toFixed(1);}).join(' ');
+    var dots=trendData.map(function(d,i){
+      var x=xP(i).toFixed(1),y=yP(d[key]).toFixed(1);
+      var amt=d[key]>=10000?(d[key]/10000).toFixed(0)+'만':d[key]>0?'₩'+Math.round(d[key]/10000)*10000/10000+'만':'';
+      return '<circle cx="'+x+'" cy="'+y+'" r="3.5" fill="'+color+'" stroke="white" stroke-width="1.5"/>'
+        +(d[key]>0?'<text x="'+x+'" y="'+(Number(y)-7).toFixed(0)+'" text-anchor="middle" font-size="7" fill="'+color+'" font-weight="700">'+amt+'</text>':'');
+    }).join('');
+    return '<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round"/>'
+      +'<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="6" opacity="0.12"/>'+dots;
+  };
+  var xLbls2=trendData.map(function(d,i){return '<text x="'+xP(i).toFixed(1)+'" y="'+(H2-4)+'" text-anchor="middle" font-size="8" fill="#A08070">'+d.label+'</text>';}).join('');
+  var lgd2='<text x="'+pL+'" y="10" font-size="8" fill="#2E6B4F" font-weight="700">● 수입</text><text x="'+(pL+36)+'" y="10" font-size="8" fill="#D4708A" font-weight="700">● 지출</text>';
+  var trendEl=document.getElementById('an-money-trend');
+  if(trendEl) trendEl.innerHTML='<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:'+H2+'px;overflow:visible">'+lgd2+mkLine2('income','#2E6B4F')+mkLine2('expense','#D4708A')+xLbls2+'</svg>';
 }
 
 
@@ -2431,8 +2368,7 @@ async function runAiAnalysis() {
 //  NAV
 // ══════════════════════════════════════════════
 const VIEW_LABELS = {
-  home: 'Scheduler', money: 'Financial', health: 'Health',
-  manage: 'Management', stats: 'Analytics'
+  home: 'Scheduler', money: 'Financial', health: 'Health', stats: 'Analytics'
 };
 
 function showView(name,btn) {
@@ -2444,7 +2380,6 @@ function showView(name,btn) {
   const logoEl = document.getElementById('logo-text');
   if(logoEl) logoEl.textContent = VIEW_LABELS[name] || 'Danalog';
   if(name==='stats'){renderStats();}
-  if(name==='manage'){renderManage();}
   if(name==='money'){renderMoney();}
   if(name==='health'){renderHealth();}
 }
