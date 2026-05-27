@@ -1862,57 +1862,6 @@ function openMoneyModal(id=null) {
   renderCatButtons();
   document.getElementById('money-modal').classList.add('open');
 }
-function closeMoneyModal() { document.getElementById('money-modal').classList.remove('open'); }
-
-function setMoneyType(t, btn) {
-  moneyType = t;
-  moneyCat = '';
-  document.querySelectorAll('#mtype-expense,#mtype-income').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderCatButtons();
-}
-
-function renderCatButtons() {
-  const cats = moneyType==='expense' ? EXPENSE_CATS : INCOME_CATS;
-  const el = document.getElementById('m-cat-btns');
-  el.innerHTML = cats.map(cat=>`
-    <button class="cat-btn ${moneyCat===cat.key?'active':''}" onclick="selectCat('${cat.key}',this)">${cat.label}</button>
-  `).join('');
-}
-
-function selectCat(key, btn) {
-  moneyCat = key;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-async function saveMoney() {
-  const text = document.getElementById('m-text').value.trim();
-  const amount = parseFloat(document.getElementById('m-amount').value);
-  if(!text) return alert('내용을 입력해주세요.');
-  if(!amount||amount<=0) return alert('금액을 입력해주세요.');
-  if(!moneyCat) return alert('카테고리를 선택해주세요.');
-  const date = document.getElementById('m-date').value || localDateStr(new Date());
-  const editId = document.getElementById('m-edit-id').value;
-  const payload = {text, amount, date, mtype: moneyType, cat: moneyCat};
-  if(editId) {
-    await sbFetch(`df_money?id=eq.${editId}`,'PATCH',payload);
-    const i = moneyRecords.findIndex(r=>r.id===editId);
-    if(i>=0) moneyRecords[i] = {...moneyRecords[i],...payload};
-  } else {
-    const res = await sbFetch('df_money','POST',payload);
-    if(Array.isArray(res)&&res[0]) moneyRecords.push(res[0]);
-  }
-  closeMoneyModal();
-  renderMoney();
-}
-
-async function deleteMoney(id) {
-  if(!confirm('삭제할까요?')) return;
-  await sbFetch(`df_money?id=eq.${id}`,'DELETE');
-  moneyRecords = moneyRecords.filter(r=>r.id!==id);
-  renderMoney();
-}
 
 
 // ══════════════════════════════════════════════
