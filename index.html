@@ -761,23 +761,6 @@ document.head.appendChild(appleLink);
             </div>
             <div class="timeline-body open" id="timeline-body"></div>
           </div>
-          <!-- Inline management -->
-          <div class="timeline-card" style="margin-top:10px">
-            <div class="timeline-header" style="cursor:pointer" onclick="toggleManagePanel()">
-              <span class="timeline-title">⚙️ 할 일 관리</span>
-              <span style="font-size:12px;color:var(--text-muted)" id="manage-toggle-txt">펼치기 ▾</span>
-            </div>
-            <div id="inline-manage-body" style="display:none;padding:10px">
-              <div style="margin-bottom:8px">
-                <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px">🌸 데일리</div>
-                <div id="inline-routines"></div>
-              </div>
-              <div>
-                <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px">🎀 스케쥴</div>
-                <div id="inline-tasks"></div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- RIGHT: side panel -->
@@ -796,6 +779,24 @@ document.head.appendChild(appleLink);
               <button class="type-btn oneoff" id="qa-oneoff" onclick="setQaType('oneoff',this)">원데이</button>
             </div>
             <button class="add-btn" onclick="quickAdd()">+ 추가하기</button>
+          </div>
+
+          <!-- Inline management -->
+          <div class="quickadd-card" style="margin-top:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;cursor:pointer" onclick="toggleManagePanel()">
+              <div class="quickadd-title" style="margin-bottom:0">⚙️ 할 일 관리</div>
+              <span style="font-size:12px;color:var(--text-muted)" id="manage-toggle-txt">펼치기 ▾</span>
+            </div>
+            <div id="inline-manage-body" style="display:none;margin-top:10px">
+              <div style="margin-bottom:8px">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px">🌸 데일리</div>
+                <div id="inline-routines"></div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px">🎀 스케쥴</div>
+                <div id="inline-tasks"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1735,7 +1736,7 @@ function renderMoneyTrend() {
   };
   const xLabels=data.map((d,i)=>'<text x="'+xPos(i).toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" font-size="8" fill="#A08070">'+d.label+'</text>').join('');
   const legend='<text x="'+padL+'" y="10" font-size="8" fill="#2E6B4F" font-weight="700">● 수입</text><text x="'+(padL+36)+'" y="10" font-size="8" fill="#D4708A" font-weight="700">● 지출</text>';
-  document.getElementById('money-trend-chart').innerHTML='<div class="line-chart-wrap"><svg class="line-chart-svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;display:block">'+legend+makeLine('income','#2E6B4F')+makeLine('expense','#D4708A')+xLabels+'</svg></div>';
+  document.getElementById('money-trend-chart').innerHTML='<svg viewBox="0 0 560 '+H+'" preserveAspectRatio="none" style="width:100%;height:'+H+'px;display:block;overflow:visible">'+legend+makeLine('income','#2E6B4F')+makeLine('expense','#D4708A')+xLabels+'</svg>';
 }
 
 function renderMoneyList(recs) {
@@ -2304,7 +2305,7 @@ function renderAnalytics() {
   });
   var maxVal2=Math.max.apply(null,trendData.map(function(d){return Math.max(d.income,d.expense);}));
   if(maxVal2===0) maxVal2=1;
-  var W2=340,H2=120,pL=8,pR=8,pT=14,pB=24,cW=W2-pL-pR,cH=H2-pT-pB,n2=trendData.length;
+  var W2=560,H2=130,pL=12,pR=12,pT=18,pB=26,cW=W2-pL-pR,cH=H2-pT-pB,n2=trendData.length;
   var xP=function(i){return pL+(i/(n2-1))*cW;};
   var yP=function(v){return pT+cH-(v/maxVal2)*cH;};
   var mkLine2=function(key,color){
@@ -2321,7 +2322,10 @@ function renderAnalytics() {
   var xLbls2=trendData.map(function(d,i){return '<text x="'+xP(i).toFixed(1)+'" y="'+(H2-4)+'" text-anchor="middle" font-size="8" fill="#A08070">'+d.label+'</text>';}).join('');
   var lgd2='<text x="'+pL+'" y="10" font-size="8" fill="#2E6B4F" font-weight="700">● 수입</text><text x="'+(pL+36)+'" y="10" font-size="8" fill="#D4708A" font-weight="700">● 지출</text>';
   var trendEl=document.getElementById('an-money-trend');
-  if(trendEl) trendEl.innerHTML='<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:'+H2+'px;overflow:visible;display:block">'+lgd2+mkLine2('income','#2E6B4F')+mkLine2('expense','#D4708A')+xLbls2+'</svg>';
+  if(trendEl) trendEl.innerHTML=''
+    +'<svg viewBox="0 0 560 '+H2+'" preserveAspectRatio="none" style="width:100%;height:'+H2+'px;display:block;overflow:visible">'
+    +lgd2+mkLine2('income','#2E6B4F')+mkLine2('expense','#D4708A')+xLbls2
+    +'</svg>';
 }
 
 
